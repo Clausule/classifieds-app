@@ -128,36 +128,42 @@
 <body>
   <input type="checkbox" id="notice-sluit" class="notice-checkbox">
   <div class="launch-notice">
-    <p><strong><%= t('notice.launch_title') %></strong> <%= t('notice.launch_message') %></p>
-    <label for="notice-sluit" class="notice-close" title="<%= t('notice.close_aria') %>">×</label>
+    <p><strong><%= tFrontend('notice.launch_title') %></strong> <%= tFrontend('notice.launch_message') %></p>
+    <label for="notice-sluit" class="notice-close" title="<%= tFrontend('notice.close_aria') %>">×</label>
   </div>
   <header class="site-header">
     <div class="container nav-row">
-      <a href="<%= locale === 'en' ? '/en' : '/' %>" class="wordmark" aria-label="Quickie.nu">
+      <a href="<%= frontendLocale === 'en' ? '/en' : '/' %>" class="wordmark" aria-label="Quickie.nu">
         <%- include('logo-mark') %>
       </a>
       <% if (typeof currentUser !== 'undefined' && currentUser) { %>
-        <button type="button" class="nav-toggle" id="nav-toggle" aria-label="<%= t('nav.menu_aria') %>" aria-expanded="false" aria-controls="nav-links">
+        <button type="button" class="nav-toggle" id="nav-toggle" aria-label="<%= tAccount('nav.menu_aria') %>" aria-expanded="false" aria-controls="nav-links">
           <span></span><span></span><span></span>
         </button>
       <% } %>
       <% if (typeof currentUser !== 'undefined' && currentUser) { %>
       <nav class="nav-links" id="nav-links">
-          <% var navPrefix = locale === 'en' ? '/en' : ''; %>
+          <% // navPrefix bouwt de URL op (routing volgt altijd de /en-frontend-
+             // prefix), maar de zichtbare labels hieronder gebruiken bewust
+             // tAccount() — dit is de ingelogde-omgeving-nav, die hoort altijd
+             // de volledige accounttaal te volgen, op élke pagina (ook frontend-
+             // pagina's als je toevallig bent ingelogd), niet t() (dat verschilt
+             // per route: frontend-nl/en op publieke pagina's). %>
+          <% var navPrefix = frontendLocale === 'en' ? '/en' : ''; %>
           <% if (currentUser.role === 'admin') { %>
-            <a href="/admin"><%= t('nav.admin') %></a>
+            <a href="/admin"><%= tAccount('nav.admin') %></a>
           <% } else { %>
-            <a href="<%= navPrefix %>/dashboard"><%= t('nav.my_listings') %></a>
-            <a href="<%= navPrefix %>/account/credits"><%= t('nav.credits') %></a>
-            <a href="<%= navPrefix %>/account/verify"><%= t('nav.my_data') %></a>
-            <a href="<%= navPrefix %>/account/settings"><%= t('nav.settings') %></a>
-            <a href="<%= navPrefix %>/dashboard/messages"><%= t('nav.support') %></a>
+            <a href="<%= navPrefix %>/dashboard"><%= tAccount('nav.my_listings') %></a>
+            <a href="<%= navPrefix %>/account/credits"><%= tAccount('nav.credits') %></a>
+            <a href="<%= navPrefix %>/account/verify"><%= tAccount('nav.my_data') %></a>
+            <a href="<%= navPrefix %>/account/settings"><%= tAccount('nav.settings') %></a>
+            <a href="<%= navPrefix %>/dashboard/messages"><%= tAccount('nav.support') %></a>
           <% } %>
           <form action="<%= navPrefix %>/logout" method="POST" style="display:inline">
-            <button type="submit" class="btn btn-outline btn-sm"><%= t('nav.logout') %></button>
+            <button type="submit" class="btn btn-outline btn-sm"><%= tAccount('nav.logout') %></button>
           </form>
         <% if (currentUser.role !== 'admin' && !currentUser.hasListings) { %>
-          <a href="<%= navPrefix %>/listings/new" class="btn btn-brand btn-sm"><%= t('nav.new_listing') %></a>
+          <a href="<%= navPrefix %>/listings/new" class="btn btn-brand btn-sm"><%= tAccount('nav.new_listing') %></a>
         <% } %>
       </nav>
       <% } %>

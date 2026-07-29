@@ -2,19 +2,19 @@
     <div class="container footer-top">
       <div class="footer-columns">
         <div class="footer-col">
-          <p class="footer-col-title"><%= t('footer.group_about') %></p>
-          <% legalPages.filter(function(p) { return p.footerGroup === 'Quickie.nu'; }).forEach(function(p) { %><a href="<%= locale === 'en' ? '/en' : '' %>/<%= p.slug %>"><%= t(p.navLabelKey) %></a><% }) %>
-          <a href="<%= locale === 'en' ? '/en' : '' %>/over-quickie#bedrijfsgegevens"><%= t('footer.contact') %></a>
+          <p class="footer-col-title"><%= tFrontend('footer.group_about') %></p>
+          <% legalPages.filter(function(p) { return p.footerGroup === 'Quickie.nu'; }).forEach(function(p) { %><a href="<%= frontendLocale === 'en' ? '/en' : '' %>/<%= p.slug %>"><%= tFrontend(p.navLabelKey) %></a><% }) %>
+          <a href="<%= frontendLocale === 'en' ? '/en' : '' %>/over-quickie#bedrijfsgegevens"><%= tFrontend('footer.contact') %></a>
         </div>
         <div class="footer-col">
-          <p class="footer-col-title"><%= t('footer.group_policy') %></p>
-          <% legalPages.filter(function(p) { return p.footerGroup === 'Beleid'; }).forEach(function(p) { %><a href="<%= locale === 'en' ? '/en' : '' %>/<%= p.slug %>"><%= t(p.navLabelKey) %></a><% }) %>
+          <p class="footer-col-title"><%= tFrontend('footer.group_policy') %></p>
+          <% legalPages.filter(function(p) { return p.footerGroup === 'Beleid'; }).forEach(function(p) { %><a href="<%= frontendLocale === 'en' ? '/en' : '' %>/<%= p.slug %>"><%= tFrontend(p.navLabelKey) %></a><% }) %>
         </div>
         <% if (!(typeof currentUser !== 'undefined' && currentUser)) { %>
         <div class="footer-col">
-          <p class="footer-col-title"><%= t('footer.group_advertise') %></p>
-          <a href="<%= locale === 'en' ? '/en' : '' %>/login" data-ga-cta="login"><%= t('footer.login') %></a>
-          <a href="<%= locale === 'en' ? '/en' : '' %>/register" data-ga-cta="register"><%= t('footer.new_listing') %></a>
+          <p class="footer-col-title"><%= tFrontend('footer.group_advertise') %></p>
+          <a href="<%= frontendLocale === 'en' ? '/en' : '' %>/login" data-ga-cta="login"><%= tFrontend('footer.login') %></a>
+          <a href="<%= frontendLocale === 'en' ? '/en' : '' %>/register" data-ga-cta="register"><%= tFrontend('footer.new_listing') %></a>
         </div>
         <% } %>
       </div>
@@ -22,11 +22,9 @@
     </div>
     <div class="footer-bottom">
       <div class="container footer-meta">
-        <%= t('footer.copyright', { year: new Date().getFullYear() }) %>
-        <% if (!(typeof usingAccountLocale !== 'undefined' && usingAccountLocale)) { %>
-          &middot;
-          <a href="<%= locale === 'en' ? localePath : ('/en' + localePath) %>"><%= t('common.language_switch') %></a>
-        <% } %>
+        <%= tFrontend('footer.copyright', { year: new Date().getFullYear() }) %>
+        &middot;
+        <a href="<%= frontendLocale === 'en' ? localePath : ('/en' + localePath) %>"><%= tFrontend('common.language_switch') %></a>
       </div>
     </div>
   </footer>

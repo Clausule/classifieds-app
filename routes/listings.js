@@ -4,7 +4,7 @@ const fs = require('fs');
 const db = require('../config/database');
 const upload = require('../config/upload');
 const { requireAuth, requireVerifiedAdvertiser } = require('../middleware/auth');
-const { useAccountLocale, translate } = require('../middleware/i18n');
+const { useAccountLocale } = require('../middleware/i18n');
 const { uniqueSlug, slugify, locationSlug, listingPath } = require('../utils/slugify');
 const { absoluteUrl, canonicalUrl, withLocale, MARKETPLACE_OPERATIONAL } = require('../utils/seo');
 const { bestMatch } = require('../utils/fuzzyMatch');
@@ -1222,22 +1222,17 @@ router.get('/listings/:location/:slug', (req, res) => {
 
   // Eigenaar die zijn eigen advertentie bekijkt (vanuit dashboard > klik op
   // naam) zit in de gebruikersomgeving, maar deze pagina blijft in essentie
-  // een publieke frontend-pagina — geen 5-talige vertaling opbouwen voor de
-  // hele advertentiepagina. In plaats daarvan dezelfde simpele NL/EN-regel
-  // als voor bezoekerspagina's: NL blijft NL, elke andere accountvoorkeur
-  // valt terug op EN. De bio/omschrijving zelf wordt hier nooit door
+  // een publieke frontend-pagina — gewoon de actieve frontendtaal (res.locals.
+  // t/locale, al gezet door loadLocale, hier bewust niet overschreven), geen
+  // accountvoorkeur. De bio/omschrijving zelf wordt hier nooit door
   // aangeraakt (gewoon rauwe listing.description, geen t()) — die staat toch
   // altijd al in het Engels (zie de hardcoded taalinstructie bij AI-generatie
   // in /listings/generate-description hieronder).
   let editButtonLabel = null;
   if (isOwner && req.user) {
-    const ownerLocale = req.user.preferred_language === 'nl' ? 'nl' : 'en';
-    res.locals.locale = ownerLocale;
-    res.locals.usingAccountLocale = true;
-    res.locals.t = function (key, vars) { return translate(ownerLocale, key, vars); };
-    // Uitzondering op de NL/EN-vereenvoudiging hierboven: de "Bewerken"-knop
-    // zelf mag wél in de volledige accountvoorkeur (alle 5 talen).
-    editButtonLabel = translate(req.user.preferred_language, 'listing_detail.edit');
+    // Uitzondering op de frontend-regel hierboven: de "Bewerken"-knop zelf
+    // mag wél in de volledige accountvoorkeur (alle 5 talen, via tAccount).
+    editButtonLabel = res.locals.tAccount('listing_detail.edit');
   }
 
   // Stad in de URL komt niet meer overeen met de huidige locatie van de

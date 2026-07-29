@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const db = require('../config/database');
 const messaging = require('../config/messaging');
 const { phoneE164 } = require('../utils/phone');
-const { translate, useAuthLocale, SUPPORTED_LOCALES } = require('../middleware/i18n');
+const { translate, useFormLocale, SUPPORTED_LOCALES } = require('../middleware/i18n');
 const { logNotification } = require('../utils/notificationLog');
 const { withLocale } = require('../utils/seo');
 
@@ -12,27 +12,32 @@ const router = express.Router();
 const TWO_FACTOR_CODE_TTL_MS = 10 * 60 * 1000;
 
 function completeLogin(req, res, user) {
-  // Alleen overschrijven als de bezoeker op de inlogpagina bewust een taal
-  // koos (dropdown of onthouden van een vorig bezoek) — anders zou de
-  // standaard-Engelse weergave een bestaande accountvoorkeur (bv. Russisch,
-  // via Instellingen gekozen) stilletjes overschrijven zodra iemand vanaf een
-  // nieuw apparaat/browser inlogt zonder de dropdown aan te raken.
-  if (SUPPORTED_LOCALES.includes(req.session.authLocale)) {
-    db.prepare('UPDATE users SET preferred_language = ? WHERE id = ?').run(req.session.authLocale, user.id);
-  }
   req.session.userId = user.id;
   const returnTo = req.session.returnTo;
   delete req.session.returnTo;
   res.redirect(returnTo || withLocale(res, user.role === 'admin' ? '/admin' : '/dashboard'));
 }
 
-router.get('/register', useAuthLocale, (req, res) => {
+router.get('/register', useFormLocale, (req, res) => {
   if (req.user) return res.redirect(withLocale(res, '/dashboard'));
   res.render('register', { title: 'auth.register.title', error: null, form: {} });
 });
 
-router.post('/register', useAuthLocale, (req, res) => {
+router.post('/register', useFormLocale, (req, res) => {
   const { email, password } = req.body;
+  // De taal die op het formulier stond bij het versturen (verborgen veld,
+  // gevoed door de dropdown) bepaalt eenmalig de accountvoorkeur — niet
+  // res.locals.formLocale, want die volgt bij een POST de sessie/query van
+  // vóór dit request, terwijl form_lang exact weergeeft wat de gebruiker zag.
+  const submittedFormLocale = SUPPORTED_LOCALES.includes(req.body.form_lang) ? req.body.form_lang : res.locals.formLocale;
+  // tForm werd door useFormLocale al gebonden aan de oude sessie/query-taal,
+  // vóórdat we hier submittedFormLocale (uit het verborgen formulierveld,
+  // dus exact wat de gebruiker zag) kennen — opnieuw binden zodat een
+  // foutmelding in dezelfde taal verschijnt als het formulier dat verstuurd werd.
+  res.locals.formLocale = submittedFormLocale;
+  res.locals.tForm = function (key, vars) {
+    return translate(submittedFormLocale, key, vars);
+  };
 
   if (!email || !password) {
     return res.status(400).render('register', {
@@ -67,18 +72,18 @@ router.post('/register', useAuthLocale, (req, res) => {
   const fallbackName = normalizedEmail.split('@')[0];
   const result = db
     .prepare('INSERT INTO users (email, password_hash, name, preferred_language) VALUES (?, ?, ?, ?)')
-    .run(normalizedEmail, passwordHash, fallbackName, res.locals.locale);
+    .run(normalizedEmail, passwordHash, fallbackName, submittedFormLocale);
 
   req.session.userId = result.lastInsertRowid;
   res.redirect(withLocale(res, '/dashboard'));
 });
 
-router.get('/login', useAuthLocale, (req, res) => {
+router.get('/login', (req, res) => {
   if (req.user) return res.redirect(withLocale(res, '/dashboard'));
   res.render('login', { title: 'auth.login.title', error: null, email: '' });
 });
 
-router.post('/login', useAuthLocale, async (req, res) => {
+router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get((email || '').toLowerCase().trim());
 
@@ -129,12 +134,12 @@ router.post('/login', useAuthLocale, async (req, res) => {
   completeLogin(req, res, user);
 });
 
-router.get('/login/2fa', useAuthLocale, (req, res) => {
+router.get('/login/2fa', (req, res) => {
   if (!req.session.twoFactor) return res.redirect(withLocale(res, '/login'));
   res.render('login-2fa', { title: 'auth.login2fa.title', error: null, mockCode: null });
 });
 
-router.post('/login/2fa', useAuthLocale, (req, res) => {
+router.post('/login/2fa', (req, res) => {
   const pending = req.session.twoFactor;
   if (!pending) return res.redirect(withLocale(res, '/login'));
 
@@ -164,14 +169,16 @@ router.post('/launch-notify', (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
-  // Zelfde vereenvoudigde NL/EN-regel als voor de eigen listing-detailpagina:
-  // NL blijft NL, elke andere accountvoorkeur valt terug op EN.
-  const redirectTo = req.user && req.user.preferred_language === 'nl' ? '/' : '/en';
+  // Frontend blijft onafhankelijk van de accountvoorkeur (zie useAccountLocale
+  // in middleware/i18n.js) — na uitloggen dus terug naar de nl/en-frontendtaal
+  // die tijdens dít bezoek al actief was (res.locals.locale), niet naar
+  // user.preferred_language.
+  const redirectTo = withLocale(res, '/');
 
-  // Bewust geen req.session.destroy() — dat gooide ook ageConfirmed (en
-  // authLocale) weg, waardoor de leeftijdscontrole na iedere logout weer
-  // verscheen. Alleen de inlog-gerelateerde sessievelden opruimen; loadUser
-  // behandelt het ontbreken van session.userId al als uitgelogd.
+  // Bewust geen req.session.destroy() — dat gooide ook ageConfirmed weg,
+  // waardoor de leeftijdscontrole na iedere logout weer verscheen. Alleen de
+  // inlog-gerelateerde sessievelden opruimen; loadUser behandelt het
+  // ontbreken van session.userId al als uitgelogd.
   delete req.session.userId;
   delete req.session.twoFactor;
   delete req.session.returnTo;

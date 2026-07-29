@@ -7,7 +7,7 @@ const { extendPremium } = require('../utils/premium');
 const { withLocale } = require('../utils/seo');
 
 const router = express.Router();
-router.use(useAccountLocale);
+router.use(['/account/credits', '/credits-checkout'], useAccountLocale);
 
 // 1 credit = 1x the existing premium duration/price constants, so changing
 // those two numbers in config/payments.js still adjusts credits everywhere.

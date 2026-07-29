@@ -7,7 +7,7 @@ const { processDueNotifications } = require('../utils/verificationFailures');
 const { withLocale } = require('../utils/seo');
 
 const router = express.Router();
-router.use(useAccountLocale);
+router.use('/dashboard', useAccountLocale);
 
 router.get('/dashboard', requireAuth, (req, res) => {
   processAutoRenewals();

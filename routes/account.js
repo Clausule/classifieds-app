@@ -18,7 +18,7 @@ const { changePassword } = require('../utils/password');
 const { withLocale } = require('../utils/seo');
 
 const router = express.Router();
-router.use(useAccountLocale);
+router.use('/account', useAccountLocale);
 
 const ID_DOCUMENT_TYPES = ['identiteitskaart', 'rijbewijs', 'paspoort'];
 const DOCUMENT_DIR = path.join(__dirname, '..', 'private-uploads', 'id-documents');

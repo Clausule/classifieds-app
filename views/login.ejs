@@ -1,7 +1,6 @@
 <%- include('partials/header') %>
 
 <div class="container auth-shell">
-  <%- include('partials/auth-lang-switch') %>
   <h1><%= t('auth.login.title') %></h1>
   <% if (error) { %><div class="alert alert-error"><%= t(error) %></div><% } %>
   <form method="POST" class="card">

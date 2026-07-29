@@ -62,6 +62,24 @@ function loadLocale(req, res, next) {
     return translate(locale, key, vars);
   };
 
+  // frontendLocale/tFrontend zijn een losse, nooit-overschreven verwijzing
+  // naar deze nl/en-frontendtaal — res.locals.locale/t zelf worden verderop
+  // (useAccountLocale, de eigen-listingpagina) overschreven met de 5-talige
+  // accountvoorkeur voor de páginainhoud, maar header.ejs/footer.ejs (notice
+  // bar, nav, footer) horen altijd deze frontendtaal te tonen, ook op
+  // pagina's binnen de ingelogde omgeving.
+  res.locals.frontendLocale = locale;
+  res.locals.tFrontend = function (key, vars) {
+    return translate(locale, key, vars);
+  };
+
+  // Onthoudt alleen de laatst-actieve frontend-taal (nl/en) voor een volgend
+  // bezoek — bewust geen redirect die hierop leest: Google raadt auto-redirect
+  // op cookie/taalvoorkeur af bij een hreflang-opzet, dat kan het crawlen van
+  // de andere taalvariant verstoren. De cookie is dus puur "onthouden", geen
+  // sturing van welke pagina getoond wordt.
+  res.cookie('frontend_lang', locale, { maxAge: 365 * 24 * 60 * 60 * 1000, sameSite: 'lax' });
+
   next();
 }
 
@@ -71,14 +89,15 @@ function loadLocale(req, res, next) {
 // route ná loadUser gemount — alleen op routes die we als "gebruikers-
 // omgeving" behandelen, dus NOT globaal, anders zouden publieke pagina's die
 // een ingelogde gebruiker toevallig bezoekt ook meeveranderen (die moeten
-// juist bezoeker-NL/EN blijven). res.locals.usingAccountLocale laat views
-// (footer.ejs) weten dat de nl/en-URL-taalwisselaar hier niet van toepassing
-// is.
+// juist bezoeker-NL/EN blijven). Overschrijft alleen res.locals.locale/t (de
+// páginainhoud van déze specifieke route) — res.locals.frontendLocale/
+// tFrontend (notice bar/footer) en res.locals.accountLocale/tAccount (de
+// ingelogde-nav in header.ejs) komen los van hier vandaan (zie loadAccountLocale
+// hieronder) en blijven dus overal consistent, ook buiten deze routes.
 function useAccountLocale(req, res, next) {
   if (req.user) {
     const locale = SUPPORTED_LOCALES.includes(req.user.preferred_language) ? req.user.preferred_language : DEFAULT_LOCALE;
     res.locals.locale = locale;
-    res.locals.usingAccountLocale = true;
     res.locals.t = function (key, vars) {
       return translate(locale, key, vars);
     };
@@ -86,28 +105,44 @@ function useAccountLocale(req, res, next) {
   next();
 }
 
-// Login/registreren: bezoeker (nog geen account), maar met een eigen
-// taalkeuze los van de generieke NL/EN-URL-regel hierboven — deze twee
-// pagina's tonen standaard Engels, ook vanaf een Nederlandse pagina, met een
-// eigen 5-talige dropdown erop. ?lang=xx (dropdown-wijziging) wordt meteen
-// onthouden in de sessie, zodat een volgend bezoek aan deze pagina's dezelfde
-// taal teruggeeft — geen aparte cookie nodig, de bestaande sessiecookie
-// (30 dagen, saveUninitialized:false) doet dit al net als bv. ageConfirmed.
-// res.locals.usingAccountLocale = true onderdrukt de generieke nl/en-
-// footerwisselaar (footer.ejs): deze pagina's hebben hun eigen dropdown, dus
-// een tweede taalwisselaar zou verwarrend zijn.
-function useAuthLocale(req, res, next) {
-  const requested = req.query.lang;
-  if (SUPPORTED_LOCALES.includes(requested)) {
-    req.session.authLocale = requested;
+// De ingelogde-navigatiebalk (header.ejs) is zichtbaar op élke pagina zolang
+// je bent ingelogd — ook op frontend-pagina's (home, footer/legal-pagina's,
+// eigen-listingpagina) die zelf hun eigen t()/locale voor de páginainhoud
+// gebruiken (frontend-nl/en of de vereenvoudigde nl/en-mapping). De nav zelf
+// hoort daar los van te staan en altijd de volledige (5-talige)
+// accountvoorkeur te tonen, dus dit draait globaal, ná loadUser, niet
+// gescoped tot specifieke routes.
+function loadAccountLocale(req, res, next) {
+  if (req.user) {
+    const locale = SUPPORTED_LOCALES.includes(req.user.preferred_language) ? req.user.preferred_language : DEFAULT_LOCALE;
+    res.locals.accountLocale = locale;
+    res.locals.tAccount = function (key, vars) {
+      return translate(locale, key, vars);
+    };
   }
-  const locale = SUPPORTED_LOCALES.includes(req.session.authLocale) ? req.session.authLocale : 'en';
-  res.locals.locale = locale;
-  res.locals.usingAccountLocale = true;
-  res.locals.t = function (key, vars) {
-    return translate(locale, key, vars);
+  next();
+}
+
+// Registreren: het formulier zelf (labels/hints/knop/foutmeldingen) kan in
+// alle 5 talen, los van de frontend-chrome (header/footer/notice bar) die
+// gewoon de actieve nl/en-frontendtaal blijft tonen — geen aparte URL/redirect
+// hiervoor, alleen het formulier vertaalt mee. ?formlang=xx (dropdown-
+// wijziging, ín het formulierblok) wordt onthouden in de sessie zodat een
+// volgend bezoek aan /register dezelfde formuliertaal teruggeeft. Standaard
+// volgt de formuliertaal de actieve frontendtaal (nl of en).
+function useFormLocale(req, res, next) {
+  const requested = req.query.formlang;
+  if (SUPPORTED_LOCALES.includes(requested)) {
+    req.session.registerFormLocale = requested;
+  }
+  const formLocale = SUPPORTED_LOCALES.includes(req.session.registerFormLocale)
+    ? req.session.registerFormLocale
+    : res.locals.locale;
+  res.locals.formLocale = formLocale;
+  res.locals.tForm = function (key, vars) {
+    return translate(formLocale, key, vars);
   };
   next();
 }
 
-module.exports = { loadLocale, translate, useAccountLocale, useAuthLocale, SUPPORTED_LOCALES, DEFAULT_LOCALE };
+module.exports = { loadLocale, translate, useAccountLocale, loadAccountLocale, useFormLocale, SUPPORTED_LOCALES, DEFAULT_LOCALE };

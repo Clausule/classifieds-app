@@ -103,6 +103,32 @@ herstart, geen aparte migratiestap nodig.
   kopie: `~/Desktop/Desktop/Quickie/public_html/`) blijven ongewijzigd — daar
   is `Disallow: /admin/ /account/ /dashboard/ /login /uploads/` al aan
   toegevoegd voor de nieuwe Node-only paden.
+- **Advertisers: frontend + legal-pagina's volgens accounttaal (spec vastgelegd
+  2026-07-29, nog te bouwen)**: het huidige systeem heeft `frontendLocale`/
+  `tFrontend` (altijd nl/en, URL-gedreven, los van account) en `accountLocale`/
+  `tAccount` (altijd de volledige accountvoorkeur, nu alleen gebruikt voor de
+  ingelogde-nav) — zie `middleware/i18n.js`. Besloten vervolg:
+  - Voor **ingelogde gebruikers** volgt de hele frontend (homepage, notice bar,
+    footer, footer/legal-pagina's) voortaan de accounttaal-mapping (nl → nl,
+    elke andere accounttaal → en), **zonder** handmatige nl/en-taalwisselaar —
+    die verdwijnt zodra je bent ingelogd (blijft ongewijzigd bestaan voor
+    anonieme bezoekers).
+  - Ingelogde gebruiker op een `/en/...`-URL die niet bij zijn accounttaal past
+    (oude link/bookmark)? **302-redirecten** (geen 301 — sessie-afhankelijk,
+    geen permanente URL-mapping) naar de juiste prefix volgens de mapping.
+    Geen SEO-impact: dit is volledig gescoped op `req.user`, crawlers hebben
+    nooit een sessie en zien dus altijd de pure URL-gedreven versie.
+  - De bestaande `frontend_lang`-cookie wordt dan geen zelfstandige bron meer
+    maar een sync-artefact: bij elke login expliciet bijgewerkt naar de
+    accountmapping, zodat er na uitloggen geen afwijkende "onthouden" waarde
+    kan bestaan die niet bij de laatst getoonde taal hoort (dit was eerder
+    verworpen wegens precies dit soort afwijking — opgelost doordat er met de
+    taalwisselaar weg ook geen concurrerende handmatige keuze meer is).
+  - Advertisers hebben dit alleen nodig voor de **legal-pagina's**, niet voor
+    marketingtekst/categorieën van de rest van de site. De content-kant
+    (`locales/es/pt/ru.json` missen nu nog ~130 publieke/frontend-keys, en de
+    legal-teksten moeten sowieso zorgvuldig/juridisch vertaald worden, niet
+    zomaar machinaal) is apart werk, los van deze architectuurwijziging.
 - **Optioneel, nog niet gebouwd**: lichte `ItemList`-structured-data (alleen
   `url`+`name`+`position` per zichtbare advertentie, geen volledige
   gedupliceerde `Service`-objecten) voor de listingkaarten op de homepage

@@ -5,7 +5,7 @@ const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 
 const { loadUser } = require('./middleware/auth');
-const { loadLocale } = require('./middleware/i18n');
+const { loadLocale, loadAccountLocale } = require('./middleware/i18n');
 const { requireAgeConfirmed } = require('./middleware/ageGate');
 const { SITE_URL, DEFAULT_OG_IMAGE } = require('./utils/seo');
 const legalPages = require('./data/legalPages');
@@ -45,6 +45,7 @@ app.use(
 
 app.use(loadLocale);
 app.use(loadUser);
+app.use(loadAccountLocale);
 app.use((req, res, next) => { res.locals.defaultOgImage = DEFAULT_OG_IMAGE; res.locals.siteUrl = SITE_URL; res.locals.legalPages = legalPages; res.locals.isAdminPage = req.path.startsWith('/admin'); next(); });
 app.use('/', ageGateRoutes);
 app.use(requireAgeConfirmed);
