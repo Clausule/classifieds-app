@@ -173,6 +173,33 @@ if (listingsTableV2 && !listingsTableV2.sql.includes("'suspended'")) {
   db.pragma('legacy_alter_table = OFF');
 }
 
+// Op databases die de 'suspended'-rebuild hierboven én de allereerste creatie
+// van credit_purchases/credit_transactions in dezelfde boot doormaakten, bleef
+// hun FK naar listings letterlijk "listings_old" heten (bijwerking van
+// legacy_alter_table tijdens die rebuild). Onschuldig totdat iets die tabellen
+// raakt via een FK-cascade (bv. een listing hard verwijderen, of een user) —
+// dan faalt SQLite met "no such table: main.listings_old", want elke FK op de
+// tabel wordt gevalideerd, niet alleen de kolom die het toevallig betreft.
+// Zelfde rebuild-aanpak: een FK-definitie kan niet in-place aangepast worden.
+const creditPurchasesTable = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='credit_purchases'").get();
+const creditTransactionsTable = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='credit_transactions'").get();
+if (
+  (creditPurchasesTable && creditPurchasesTable.sql.includes('listings_old')) ||
+  (creditTransactionsTable && creditTransactionsTable.sql.includes('listings_old'))
+) {
+  db.pragma('legacy_alter_table = ON');
+  db.transaction(() => {
+    db.exec('ALTER TABLE credit_purchases RENAME TO credit_purchases_old');
+    db.exec('ALTER TABLE credit_transactions RENAME TO credit_transactions_old');
+    db.exec(schema);
+    db.exec('INSERT INTO credit_purchases SELECT * FROM credit_purchases_old');
+    db.exec('INSERT INTO credit_transactions SELECT * FROM credit_transactions_old');
+    db.exec('DROP TABLE credit_transactions_old');
+    db.exec('DROP TABLE credit_purchases_old');
+  })();
+  db.pragma('legacy_alter_table = OFF');
+}
+
 // WhatsApp support channel: tracks whether a message came in/out via the
 // website or via WhatsApp, so admin replies know where to route back to.
 try {
