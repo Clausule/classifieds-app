@@ -299,6 +299,21 @@ VPS `pm2 reload` (herstart zonder downtime). Schema-wijzigingen zijn veilig
 (`CREATE TABLE IF NOT EXISTS`), maar maak vlak vóór zo'n deploy voor de
 zekerheid een extra back-up-snapshot.
 
+**Welke versie staat live?** Sinds 2026-07-29 heeft dit project lokaal git
+(zie CLAUDE.md) — puur lokaal versiebeheer, de VPS zelf blijft bewust
+git-vrij (rsync, geen `git pull` op de server, zie hierboven). Om toch te
+weten welke commit er precies live staat: zet ná elke geslaagde rsync-deploy
+lokaal de tag `deployed` op de zojuist gesyncte commit:
+```
+git tag -f deployed
+```
+(`-f` verplaatst de tag als hij al bestaat — er is maar één "huidige
+live-versie"). `git diff deployed main` laat dan altijd zien wat er sinds de
+laatste deploy lokaal is veranderd maar nog niet live staat; `git show
+deployed` laat zien welke commit precies live staat. Dit is pure discipline
+— git detecteert de rsync zelf niet, dus vergeet de tag niet te verzetten na
+elke deploy.
+
 ## Klaar? → volgende stap
 
 Zodra de VPS draait en de site technisch bereikbaar is (maar nog `noindex`),
