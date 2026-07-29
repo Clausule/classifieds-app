@@ -1,0 +1,50 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="padding-top:28px;">
+  <h1>Adverteerders verifiëren</h1>
+  <div class="admin-tabs">
+    <a href="/admin">Overzicht</a>
+    <a href="/admin/listings">Listings</a>
+    <a href="/admin/verificaties" class="active">Verificaties</a>
+    <a href="/admin/users">Gebruikers</a>
+    <a href="/admin/messages">Support inbox</a>
+    <a href="/admin/reports">Meldingen</a>
+    <a href="/admin/instellingen">Instellingen</a>
+  </div>
+
+  <% var profileStatusLabels = { approved: 'goedgekeurd', rejected: 'afgewezen' }; %>
+  <div class="admin-tabs" style="border-bottom:none;margin-bottom:14px;">
+    <% ['pending', 'approved', 'rejected', 'all'].forEach(function(s) { %>
+      <a href="/admin/verificaties?status=<%= s %>" class="<%= currentStatus === s ? 'active' : '' %>" style="text-transform:capitalize;"><%= s %></a>
+    <% }) %>
+  </div>
+
+  <% if (profiles.length === 0) { %>
+    <div class="empty-state">Geen profielen in deze status.</div>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr><th>Naam</th><th>E-mail</th><th>Telefoonnummer</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% profiles.forEach(function(p) { %>
+          <tr>
+            <td><%= p.first_name %> <%= p.last_name %></td>
+            <td>
+              <%= p.email %>
+              <% if (p.email_verified_at) { %><span class="badge badge-active">geverifieerd</span><% } else { %><span class="badge badge-pending">niet geverifieerd</span><% } %>
+            </td>
+            <td>
+              +<%= p.phone_code %> <%= p.phone_number %>
+              <% if (p.phone_verified_at) { %><span class="badge badge-active">geverifieerd</span><% } else { %><span class="badge badge-pending">niet geverifieerd</span><% } %>
+            </td>
+            <td><span class="badge badge-<%= p.status === 'approved' ? 'active' : p.status %>"><%= profileStatusLabels[p.status] || p.status %></span></td>
+            <td><a href="/admin/verificaties/<%= p.id %>" class="btn btn-sm btn-outline">Bekijken</a></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

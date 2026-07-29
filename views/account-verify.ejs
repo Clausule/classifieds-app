@@ -1,0 +1,269 @@
+<%- include('partials/header') %>
+
+<div class="container" style="max-width:640px;padding-top:28px;">
+  <h1><%= t('account_verify.title') %></h1>
+  <p class="form-hint" style="margin-bottom:20px;">
+    <%= t('account_verify.intro') %>
+  </p>
+
+  <% if (typeof query !== 'undefined' && query && query.email_verified) { %>
+    <div class="alert alert-success"><%= t('account_verify.email_verified_flash') %></div>
+  <% } %>
+
+  <% if (profile.status === 'pending') { %>
+    <div class="alert" style="background:var(--gold-bg);color:var(--gold);">
+      <%= t('account_verify.status_pending') %>
+      <% if (!currentUser.email_verified_at) { %> <%= t('account_verify.status_pending_confirm_email') %><% } %>
+    </div>
+  <% } else if (profile.status === 'rejected') { %>
+    <div class="alert alert-error">
+      <%= t('account_verify.status_rejected_prefix') %><% if (profile.rejection_reason) { %>: <%= profile.rejection_reason %><% } %>. <%= t('account_verify.status_rejected_suffix') %>
+    </div>
+  <% } else if (profile.status === 'approved') { %>
+    <div class="alert alert-success"><%= t('account_verify.status_approved') %></div>
+  <% } %>
+
+  <% if (error) { %><div class="alert alert-error"><%= t(error) %></div><% } %>
+
+  <% if (locked) { %>
+    <div class="card">
+      <p class="form-hint">
+        <%- t('account_verify.locked_hint') %>
+      </p>
+      <table style="width:100%;font-size:14px;margin-top:8px;">
+        <tr><td style="color:var(--ink-soft);padding:5px 0;width:40%;"><%= t('account_verify.name') %></td><td><%= profile.first_name %> <%= profile.last_name %></td></tr>
+        <tr><td style="color:var(--ink-soft);padding:5px 0;"><%= t('account_verify.id_document') %></td><td><%= t('enum.id_document_type.' + profile.id_document_type) %> — <%= profile.id_document_number %></td></tr>
+        <tr>
+          <td style="color:var(--ink-soft);padding:5px 0;"><%= t('account_verify.email') %></td>
+          <td><%= currentUser.email %> <span class="badge badge-<%= currentUser.email_verified_at ? 'active' : 'rejected' %>" style="margin-left:6px;"><%= currentUser.email_verified_at ? t('account_verify.verified') : t('account_verify.not_verified') %></span></td>
+        </tr>
+        <tr>
+          <td style="color:var(--ink-soft);padding:5px 0;"><%= t('account_verify.phone_number') %></td>
+          <td>
+            +<%= profile.phone_code %> <%= profile.phone_number %>
+            <span class="badge badge-<%= profile.phone_verified_at ? 'active' : 'rejected' %>" style="margin-left:6px;"><%= profile.phone_verified_at ? t('account_verify.verified') : t('account_verify.not_verified') %></span>
+          </td>
+        </tr>
+      </table>
+      <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 0;"><%= t('account_verify.phone_shown_on_ads') %></p>
+      <% if (!currentUser.email_verified_at) { %>
+        <form method="POST" action="/account/verify/email/resend" style="margin-top:12px;">
+          <button type="submit" class="btn btn-outline btn-sm"><%= t('account_verify.resend_verification_email') %></button>
+        </form>
+      <% } %>
+      <%- include('partials/phone-verify', { profile, query }) %>
+    </div>
+  <% } else { %>
+  <div class="form-steps-indicator">
+    <div class="form-steps-bar"><div class="form-steps-fill" id="steps-fill"></div></div>
+    <p class="form-hint" id="steps-label" style="text-align:center;margin-top:6px;"></p>
+  </div>
+  <form method="POST" enctype="multipart/form-data" class="card" id="account-verify-form">
+
+    <div class="form-step" data-step="1">
+    <h3 style="margin-top:0;"><%= t('account_verify.personal_data') %></h3>
+    <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <label for="first_name"><%= t('account_verify.first_name_label') %></label>
+        <input type="text" id="first_name" name="first_name" required value="<%= profile.first_name || '' %>">
+      </div>
+      <div>
+        <label for="last_name"><%= t('account_verify.last_name_label') %></label>
+        <input type="text" id="last_name" name="last_name" required value="<%= profile.last_name || '' %>">
+      </div>
+    </div>
+    <p class="form-hint" style="margin-top:-8px;"><%= t('account_verify.name_hint') %></p>
+    <button type="button" class="btn btn-brand btn-block form-step-next" style="margin-top:12px;"><%= t('account_verify.next') %></button>
+    </div>
+
+    <div class="form-step" data-step="2">
+    <h3 style="margin-top:0;"><%= t('account_verify.id_document_heading') %></h3>
+    <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <label for="id_document_type"><%= t('account_verify.id_document_type_label') %></label>
+        <select id="id_document_type" name="id_document_type" required>
+          <option value=""><%= t('account_verify.choose') %></option>
+          <option value="identiteitskaart" <%= profile.id_document_type === 'identiteitskaart' ? 'selected' : '' %>><%= t('enum.id_document_type.identiteitskaart') %></option>
+          <option value="rijbewijs" <%= profile.id_document_type === 'rijbewijs' ? 'selected' : '' %>><%= t('enum.id_document_type.rijbewijs') %></option>
+          <option value="paspoort" <%= profile.id_document_type === 'paspoort' ? 'selected' : '' %>><%= t('enum.id_document_type.paspoort') %></option>
+        </select>
+      </div>
+      <div>
+        <label for="id_document_number"><%= t('account_verify.id_document_number_label') %></label>
+        <input type="text" id="id_document_number" name="id_document_number" required value="<%= profile.id_document_number || '' %>">
+      </div>
+    </div>
+    <div class="form-row">
+      <label for="id_document_front" id="front-label"><%= t('account_verify.front_photo_label') %></label>
+      <input type="file" id="id_document_front" name="id_document_front" accept="image/*,.pdf">
+      <% if (profile.id_document_front) { %><p class="form-hint"><%= t('account_verify.file_already_registered') %></p><% } %>
+    </div>
+    <div class="form-row" id="back-field">
+      <label for="id_document_back"><%= t('account_verify.back_photo_label') %></label>
+      <input type="file" id="id_document_back" name="id_document_back" accept="image/*,.pdf">
+      <% if (profile.id_document_back) { %><p class="form-hint"><%= t('account_verify.file_already_registered') %></p><% } %>
+    </div>
+    <div class="form-row">
+      <label for="selfie_photo"><%= t('account_verify.selfie_label') %></label>
+      <input type="file" id="selfie_photo" name="selfie_photo" accept="image/*" capture="user">
+      <p class="form-hint">
+        <% if (profile.selfie_photo) { %><%= t('account_verify.selfie_already_registered') %><% } else { %><%= t('account_verify.selfie_hint') %><% } %>
+      </p>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;">
+      <button type="button" class="btn btn-outline form-step-back"><%= t('account_verify.previous') %></button>
+      <button type="button" class="btn btn-brand form-step-next" style="flex:1;"><%= t('account_verify.next') %></button>
+    </div>
+    </div>
+
+    <div class="form-step" data-step="3">
+    <h3 style="margin-top:0;"><%= t('account_verify.phone_heading') %></h3>
+    <%
+      function countryLabel(dialCode) {
+        var c = countries.find(function (x) { return x.dialCode === dialCode; });
+        return c ? c.name + ' (+' + c.dialCode + ')' : '';
+      }
+    %>
+    <div class="form-row">
+      <label>
+        <%= t('account_verify.phone_label') %>
+        <span class="badge badge-<%= profile.phone_verified_at ? 'active' : 'rejected' %>" style="margin-left:6px;"><%= profile.phone_verified_at ? t('account_verify.verified') : t('account_verify.not_verified') %></span>
+      </label>
+      <div class="phone-field-group">
+        <div style="position:relative;">
+          <input type="text" id="phone_country_search" autocomplete="off" placeholder="<%= t('account_verify.country_search_placeholder') %>" value="<%= countryLabel(profile.phone_code) %>">
+          <input type="hidden" id="phone_code" name="phone_code" value="<%= profile.phone_code || '' %>">
+          <div class="suggestions-list" id="phone_country_suggestions" style="display:none;"></div>
+        </div>
+        <input type="text" id="phone_number" name="phone_number" required placeholder="<%= t('account_verify.phone_placeholder') %>" value="<%= profile.phone_number || '' %>">
+      </div>
+      <p class="form-hint"><%= t('account_verify.phone_verification_hint') %></p>
+      <p style="font-size:13px;font-weight:600;color:var(--ink);margin:6px 0 0;"><%= t('account_verify.phone_shown_on_ads') %></p>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;">
+      <button type="button" class="btn btn-outline form-step-back"><%= t('account_verify.previous') %></button>
+      <button type="submit" class="btn btn-brand" style="flex:1;"><%= t('account_verify.save') %></button>
+    </div>
+    </div>
+
+  </form>
+  <% } %>
+</div>
+
+<script>
+  // Formulier in stappen, zelfde patroon als listing-form.ejs: elke .form-step
+  // wordt getoond/verborgen met een voortgangsbalk erboven. Alleen aanwezig in
+  // de invulbare (niet-locked) weergave.
+  (function () {
+    var steps = Array.prototype.slice.call(document.querySelectorAll('.form-step'));
+    if (steps.length === 0) return;
+    var total = steps.length;
+    var current = 0;
+    var fill = document.getElementById('steps-fill');
+    var label = document.getElementById('steps-label');
+    var stepProgress = <%- JSON.stringify(t('account_verify.js.step_progress')) %>;
+
+    function showStep(index) {
+      steps.forEach(function (step, i) { step.style.display = i === index ? 'block' : 'none'; });
+      fill.style.width = (((index + 1) / total) * 100) + '%';
+      label.textContent = stepProgress.replace('{{current}}', index + 1).replace('{{total}}', total);
+    }
+
+    function validateStep(index) {
+      var fields = steps[index].querySelectorAll('input, select, textarea');
+      for (var i = 0; i < fields.length; i++) {
+        if (!fields[i].checkValidity()) {
+          fields[i].reportValidity();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    document.querySelectorAll('.form-step-next').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (!validateStep(current)) return;
+        current++;
+        showStep(current);
+      });
+    });
+
+    document.querySelectorAll('.form-step-back').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        current--;
+        showStep(current);
+      });
+    });
+
+    showStep(current);
+  })();
+
+  (function () {
+    var typeSelect = document.getElementById('id_document_type');
+    var backField = document.getElementById('back-field');
+    var frontLabel = document.getElementById('front-label');
+    if (!typeSelect) return;
+
+    var frontLabelText = <%- JSON.stringify(t('account_verify.front_photo_label')) %>;
+    var passportLabelText = <%- JSON.stringify(t('account_verify.passport_photo_label')) %>;
+
+    function sync() {
+      var needsBack = typeSelect.value === 'identiteitskaart' || typeSelect.value === 'rijbewijs';
+      backField.style.display = needsBack ? 'block' : 'none';
+      frontLabel.textContent = typeSelect.value === 'paspoort' ? passportLabelText : frontLabelText;
+    }
+
+    typeSelect.addEventListener('change', sync);
+    sync();
+  })();
+
+  // Land-typeahead voor de telefoon-landcode-velden: toont "Land (+code)",
+  // slaat alleen de code op in het verborgen veld dat echt verstuurd wordt.
+  (function () {
+    var countries = <%- JSON.stringify(countries) %>;
+
+    function label(c) { return c.name + ' (+' + c.dialCode + ')'; }
+
+    function setup(searchId, hiddenId, suggestionsId) {
+      var search = document.getElementById(searchId);
+      var hidden = document.getElementById(hiddenId);
+      var box = document.getElementById(suggestionsId);
+      if (!search) return;
+
+      function render(matches) {
+        box.innerHTML = '';
+        if (!matches.length) { box.style.display = 'none'; return; }
+        matches.slice(0, 8).forEach(function (c) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = label(c);
+          btn.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            search.value = label(c);
+            hidden.value = c.dialCode;
+            box.style.display = 'none';
+          });
+          box.appendChild(btn);
+        });
+        box.style.display = 'block';
+      }
+
+      search.addEventListener('input', function () {
+        hidden.value = '';
+        var term = search.value.trim().toLowerCase();
+        if (!term) { box.style.display = 'none'; return; }
+        render(countries.filter(function (c) {
+          return c.name.toLowerCase().indexOf(term) !== -1 || c.dialCode.indexOf(term) !== -1;
+        }));
+      });
+
+      search.addEventListener('blur', function () {
+        setTimeout(function () { box.style.display = 'none'; }, 150);
+      });
+    }
+
+    setup('phone_country_search', 'phone_code', 'phone_country_suggestions');
+  })();
+</script>
+
+<%- include('partials/footer') %>

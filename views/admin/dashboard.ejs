@@ -1,0 +1,57 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="padding-top:28px;">
+  <h1>Beheer overzicht</h1>
+  <div class="admin-tabs">
+    <a href="/admin" class="active">Overzicht</a>
+    <a href="/admin/listings">Listings</a>
+    <a href="/admin/verificaties">Verificaties</a>
+    <a href="/admin/users">Gebruikers</a>
+    <a href="/admin/messages">Support inbox<% if (stats.unreadMessages > 0) { %> (<%= stats.unreadMessages %>)<% } %></a>
+    <a href="/admin/reports">Meldingen<% if (stats.openReports > 0) { %> (<%= stats.openReports %>)<% } %></a>
+    <a href="/admin/instellingen">Instellingen</a>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat"><div class="num"><%= stats.pending %></div><div class="label">Te beoordelen</div></div>
+    <div class="stat"><div class="num"><%= stats.active %></div><div class="label">Actieve listings</div></div>
+    <div class="stat"><div class="num"><%= stats.premium %></div><div class="label">Premium listings</div></div>
+    <div class="stat"><div class="num"><%= stats.users %></div><div class="label">Gebruikers</div></div>
+    <div class="stat"><div class="num"><%= stats.unreadMessages %></div><div class="label">Ongelezen berichten</div></div>
+    <div class="stat"><div class="num"><%= stats.openReports %></div><div class="label">Open meldingen</div></div>
+  </div>
+
+  <% var rowStatusLabels = { active: 'Actief', suspended: 'Geschorst', rejected: 'Afgewezen', deleted: 'Verwijderd' }; %>
+  <h2>Recent geplaatst</h2>
+  <table class="admin-table">
+    <thead><tr><th style="width:70px;">Nummer</th><th>Naam</th><th>Status</th><th>Geplaatst</th><th>Bekeken</th><th>Geklikt</th><th>Adverteerder</th></tr></thead>
+    <tbody>
+      <% recentListings.forEach(function(l) { %>
+        <tr>
+          <td>#<%= String(l.id).padStart(4, '0') %></td>
+          <td><a href="/listings/<%= l.slug %>"><%= l.doll_name %></a></td>
+          <td>
+            <span class="badge badge-<%= l.status %>"><%= rowStatusLabels[l.status] || l.status %></span>
+            <% if ((l.status === 'pending' || l.status === 'rejected') && l.activated_at) { %>
+              <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;white-space:nowrap;">
+                Eerder actief sinds <%= new Date(l.activated_at + 'Z').toLocaleDateString('nl-NL') %>
+              </div>
+            <% } %>
+          </td>
+          <td><%= new Date(l.created_at).toLocaleDateString('nl-NL') %></td>
+          <td><%= l.views_count %></td>
+          <td><%= l.call_clicks_count %></td>
+          <td>
+            <% if (l.seller_profile_id) { %>
+              <a href="/admin/verificaties/<%= l.seller_profile_id %>"><%= l.seller_name %></a>
+            <% } else { %>
+              <%= l.seller_name %>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,641 @@
+<%- include('partials/header') %>
+
+<div class="container" style="max-width:640px;padding-top:28px;">
+  <h1><%= listing.id ? t('listing_form.title_edit') : t('listing_form.title_new') %></h1>
+  <p class="form-hint" style="margin-bottom:20px;">
+    <% if (listing.id) { %>
+      <%= t('listing_form.hint_edit') %>
+    <% } else { %>
+      <%= t('listing_form.hint_new') %>
+    <% } %>
+  </p>
+
+  <% if (error) { %><div class="alert alert-error"><%= t(error) %></div><% } %>
+
+  <div class="form-steps-indicator">
+    <div class="form-steps-bar"><div class="form-steps-fill" id="steps-fill"></div></div>
+    <p class="form-hint" id="steps-label" style="text-align:center;margin-top:6px;"></p>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" class="card" id="listing-form">
+
+    <div class="form-step" data-step="1">
+      <h3 style="margin-top:0;"><%= t('listing_form.step1_heading') %></h3>
+      <div class="form-row">
+        <label for="doll_name"><%= t('listing_form.name_label') %></label>
+        <input type="text" id="doll_name" name="doll_name" required placeholder="<%= t('listing_form.name_placeholder') %>" value="<%= listing.doll_name || '' %>">
+      </div>
+
+      <div class="form-row">
+        <label for="price"><%= t('listing_form.price_label') %></label>
+        <select id="price" name="price" required>
+          <option value=""><%= t('listing_form.price_choose') %></option>
+          <% priceOptions.forEach(function(p) { %>
+            <option value="<%= p %>" <%= Number(listing.price) === p ? 'selected' : '' %>>&euro;<%= p %></option>
+          <% }) %>
+        </select>
+        <p class="form-hint"><%= t('listing_form.price_vluggertje_hint') %></p>
+      </div>
+
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="position:relative;">
+          <label for="location"><%= t('listing_form.city_label') %></label>
+          <input type="text" id="location" name="location" placeholder="<%= t('listing_form.city_placeholder') %>" autocomplete="off" required value="<%= listing.location || '' %>">
+          <div id="location-suggestions" class="suggestions-list" style="display:none;"></div>
+          <p class="form-hint" id="location-error" style="color:#c0392b;display:none;"><%= t('listing_form.city_error') %></p>
+        </div>
+        <div>
+          <label for="neighborhood"><%= t('listing_form.neighborhood_label') %></label>
+          <select id="neighborhood" name="neighborhood" required disabled>
+            <option value=""><%= t('listing_form.neighborhood_choose_city_first') %></option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <button type="button" id="use-location-btn" class="btn btn-outline btn-sm"><%= t('listing_form.use_location') %></button>
+        <p class="form-hint" id="use-location-status"></p>
+        <p class="form-hint"><%= t('listing_form.use_location_privacy_hint') %></p>
+      </div>
+
+      <% if (phoneDisplay) { %>
+        <p class="form-hint"><%- t('listing_form.phone_hint', { phone: phoneDisplay }) %></p>
+      <% } %>
+
+      <button type="button" class="btn btn-brand btn-block form-step-next"><%= t('listing_form.next') %></button>
+    </div>
+
+    <div class="form-step" data-step="2">
+      <h3 style="margin-top:0;"><%= t('listing_form.step2_heading') %></h3>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div>
+          <label for="age"><%= t('listing_form.age_label') %></label>
+          <input type="text" inputmode="numeric" id="age" name="age" required placeholder="<%= t('listing_form.age_placeholder') %>" value="<%= listing.age || '' %>">
+        </div>
+        <div>
+          <label for="length_cm"><%= t('listing_form.length_label') %></label>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="text" inputmode="numeric" id="length_cm" name="length_cm" required placeholder="<%= t('listing_form.length_placeholder') %>" value="<%= listing.length_cm || '' %>">
+            <span class="form-hint" style="margin:0;"><%= t('listing_form.length_unit') %></span>
+          </div>
+        </div>
+        <div>
+          <label for="weight_kg"><%= t('listing_form.weight_label') %></label>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="text" inputmode="numeric" id="weight_kg" name="weight_kg" required placeholder="<%= t('listing_form.weight_placeholder') %>" value="<%= listing.weight_kg || '' %>">
+            <span class="form-hint" style="margin:0;"><%= t('listing_form.weight_unit') %></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label for="body_type"><%= t('listing_form.body_type_label') %></label>
+          <select id="body_type" name="body_type" required>
+            <option value=""><%= t('listing_form.choose') %></option>
+            <% bodyTypes.forEach(function(b) { %>
+              <option value="<%= b %>" <%= listing.body_type === b ? 'selected' : '' %>><%= t('enum.body_type.' + b) %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label for="origin_region"><%= t('listing_form.origin_region_label') %></label>
+          <select id="origin_region" name="origin_region" required>
+            <option value=""><%= t('listing_form.choose') %></option>
+            <% originRegions.forEach(function(r) { %>
+              <option value="<%= r %>" <%= listing.origin_region === r ? 'selected' : '' %>><%= t('enum.origin_region.' + r) %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label for="skin_tone"><%= t('listing_form.skin_tone_label') %></label>
+          <select id="skin_tone" name="skin_tone" required>
+            <option value=""><%= t('listing_form.choose') %></option>
+            <% skinTones.forEach(function(s) { %>
+              <option value="<%= s %>" <%= listing.skin_tone === s ? 'selected' : '' %>><%= t('enum.skin_tone.' + s) %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label for="hair_color"><%= t('listing_form.hair_color_label') %></label>
+          <select id="hair_color" name="hair_color" required>
+            <option value=""><%= t('listing_form.choose') %></option>
+            <% hairColors.forEach(function(h) { %>
+              <option value="<%= h %>" <%= listing.hair_color === h ? 'selected' : '' %>><%= t('enum.hair_color.' + h) %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button type="button" class="btn btn-outline form-step-back"><%= t('listing_form.previous') %></button>
+        <button type="button" class="btn btn-brand form-step-next" style="flex:1;"><%= t('listing_form.next') %></button>
+      </div>
+    </div>
+
+    <div class="form-step" data-step="3">
+      <h3 style="margin-top:0;"><%= t('listing_form.step3_heading') %></h3>
+      <div class="form-row">
+        <label><%= t('listing_form.languages_label') %></label>
+        <% var selectedLanguages = (listing.languages || '').split(',').map(function(l) { return l.trim(); }); %>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 16px;">
+          <% languageOptions.forEach(function(lang) { %>
+            <label style="display:flex;align-items:center;gap:6px;font-weight:400;font-size:14px;">
+              <input type="checkbox" name="languages" value="<%= lang %>" <%= selectedLanguages.indexOf(lang) !== -1 ? 'checked' : '' %>>
+              <%= t('enum.language.' + lang) %>
+            </label>
+          <% }) %>
+        </div>
+        <p class="form-hint" id="languages-error" style="color:#c0392b;display:none;"><%= t('listing_form.js.languages_required') %></p>
+      </div>
+
+      <div class="form-row">
+        <label for="description"><%= t('listing_form.description_label') %></label>
+
+        <% var hasVibeAnswers = listing.first_impression || listing.meeting_atmosphere || listing.desired_impression || listing.visitor_expectation; %>
+        <div id="vibe-questions" style="display:<%= hasVibeAnswers ? 'block' : 'none' %>;margin-bottom:12px;padding:14px;background:var(--panel);border-radius:var(--radius);">
+          <p class="form-hint" style="margin-top:0;"><%= t('listing_form.vibe_intro') %></p>
+          <div class="form-row" style="margin-bottom:10px;">
+            <label for="first_impression"><%= t('listing_form.first_impression_label') %></label>
+            <select id="first_impression" name="first_impression">
+              <option value=""><%= t('listing_form.choose') %></option>
+              <% firstImpressions.forEach(function(v) { %>
+                <option value="<%= v %>" <%= listing.first_impression === v ? 'selected' : '' %>><%= t('enum.first_impression.' + v) %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="form-row" style="margin-bottom:10px;">
+            <label for="meeting_atmosphere"><%= t('listing_form.meeting_atmosphere_label') %></label>
+            <select id="meeting_atmosphere" name="meeting_atmosphere">
+              <option value=""><%= t('listing_form.choose') %></option>
+              <% meetingAtmospheres.forEach(function(v) { %>
+                <option value="<%= v %>" <%= listing.meeting_atmosphere === v ? 'selected' : '' %>><%= t('enum.meeting_atmosphere.' + v) %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="form-row" style="margin-bottom:10px;">
+            <label for="desired_impression"><%= t('listing_form.desired_impression_label') %></label>
+            <select id="desired_impression" name="desired_impression">
+              <option value=""><%= t('listing_form.choose') %></option>
+              <% desiredImpressions.forEach(function(v) { %>
+                <option value="<%= v %>" <%= listing.desired_impression === v ? 'selected' : '' %>><%= t('enum.desired_impression.' + v) %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="form-row" style="margin-bottom:0;">
+            <label for="visitor_expectation"><%= t('listing_form.visitor_expectation_label') %></label>
+            <select id="visitor_expectation" name="visitor_expectation">
+              <option value=""><%= t('listing_form.choose') %></option>
+              <% visitorExpectations.forEach(function(v) { %>
+                <option value="<%= v %>" <%= listing.visitor_expectation === v ? 'selected' : '' %>><%= t('enum.visitor_expectation.' + v) %></option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+
+        <button type="button" id="generate-description-btn" class="btn btn-outline btn-sm" style="margin-bottom:8px;"><%= hasVibeAnswers ? t('listing_form.generate_description_confirm') : t('listing_form.generate_description') %></button>
+        <textarea id="description" name="description" required><%= listing.description || '' %></textarea>
+        <p class="form-hint" id="generate-description-status"></p>
+      </div>
+
+      <div class="form-row">
+        <label for="images"><%= t('listing_form.photos_label') %></label>
+        <input type="file" id="images" name="images" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif">
+        <p class="form-hint"><%= t('listing_form.photos_hint') %></p>
+        <p class="form-hint" id="images-status"></p>
+        <div id="new-image-preview" style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;"></div>
+        <% if (typeof images !== 'undefined' && images && images.length) { %>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <% images.forEach(function(img) { %>
+              <img src="/uploads/<%= img.filename %>" style="width:60px;height:45px;object-fit:cover;border-radius:var(--radius);border:1px solid var(--border);">
+            <% }) %>
+          </div>
+          <p class="form-hint"><%= t('listing_form.photos_added_hint') %></p>
+        <% } %>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button type="button" class="btn btn-outline form-step-back"><%= t('listing_form.previous') %></button>
+        <button type="submit" class="btn btn-brand" style="flex:1;"><%= listing.id ? t('listing_form.submit_edit') : t('listing_form.submit_new') %></button>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  // Aantal foto's dat al bij deze advertentie hoort (0 bij een nieuwe) — kan
+  // nog niet verwijderd worden, telt dus mee voor de min-4/max-10-grens.
+  var existingImageCount = <%- JSON.stringify(typeof images !== 'undefined' && images ? images.length : 0) %>;
+
+  // Vertaalde strings vanuit EJS, zodat dit script-blok geen hardcoded
+  // Nederlandse tekst hoeft te bevatten — zie locales/nl.json / en.json.
+  var i18n = <%- JSON.stringify({
+    stepProgress: t('listing_form.js.step_progress'),
+    missingFields: t('listing_form.js.missing_fields'),
+    missingVibeFields: t('listing_form.js.missing_vibe_fields'),
+    languagesRequired: t('listing_form.js.languages_required'),
+    photosMin: t('listing_form.js.photos_min'),
+    generating: t('listing_form.js.generating'),
+    generateDescriptionConfirm: t('listing_form.generate_description_confirm'),
+    generateFailed: t('listing_form.js.generate_failed'),
+    generateFailedConnection: t('listing_form.js.generate_failed_connection'),
+    fileAcceptedAria: t('listing_form.js.file_accepted_aria'),
+    removePhotoAria: t('listing_form.js.remove_photo_aria'),
+    photosSelected: t('listing_form.js.photos_selected'),
+    photosMax: t('listing_form.js.photos_max'),
+    loadingNeighborhoods: t('listing_form.js.loading_neighborhoods'),
+    chooseNeighborhood: t('listing_form.js.choose_neighborhood'),
+    neighborhoodChooseCityFirst: t('listing_form.neighborhood_choose_city_first'),
+    neighborhoodsFailed: t('listing_form.js.neighborhoods_failed'),
+    geolocationUnsupported: t('listing_form.js.geolocation_unsupported'),
+    locating: t('listing_form.js.locating'),
+    cityFoundPickNeighborhood: t('listing_form.js.city_found_pick_neighborhood'),
+    locationNoMatch: t('listing_form.js.location_no_match'),
+    locationFailed: t('listing_form.js.location_failed'),
+    locationDenied: t('listing_form.js.location_denied'),
+  }) %>;
+
+  // Formulier in stappen: elke .form-step wordt getoond/verborgen, met een
+  // voortgangsbalk erboven. Eén <form>, één submit — alleen de laatste stap
+  // heeft de echte submit-knop, de rest is puur UI-navigatie.
+  (function () {
+    var steps = Array.prototype.slice.call(document.querySelectorAll('.form-step'));
+    var total = steps.length;
+    var current = 0;
+    var fill = document.getElementById('steps-fill');
+    var label = document.getElementById('steps-label');
+
+    function showStep(index) {
+      steps.forEach(function (step, i) { step.style.display = i === index ? 'block' : 'none'; });
+      fill.style.width = (((index + 1) / total) * 100) + '%';
+      label.textContent = i18n.stepProgress.replace('{{current}}', index + 1).replace('{{total}}', total);
+    }
+
+    function validateStep(index) {
+      var fields = steps[index].querySelectorAll('input, select, textarea');
+      for (var i = 0; i < fields.length; i++) {
+        if (!fields[i].checkValidity()) {
+          fields[i].reportValidity();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    document.querySelectorAll('.form-step-next').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (!validateStep(current)) return;
+        current++;
+        showStep(current);
+      });
+    });
+
+    document.querySelectorAll('.form-step-back').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        current--;
+        showStep(current);
+      });
+    });
+
+    showStep(current);
+  })();
+
+  // Losse foto's kiezen overschrijft normaal gesproken de vorige selectie
+  // (native gedrag van <input type="file">) — we houden de selectie daarom
+  // zelf bij in selectedImageFiles en zetten het bestand pas op de input
+  // terug via DataTransfer, zodat meerdere keren achter elkaar kiezen optelt
+  // in plaats van vervangt. Elke preview krijgt ook een kruisje om 'm weer
+  // te verwijderen vóór het versturen.
+  (function () {
+    var input = document.getElementById('images');
+    var preview = document.getElementById('new-image-preview');
+    var status = document.getElementById('images-status');
+    // Bestaande foto's (bij bewerken) tellen mee voor de max van 10 — kunnen
+    // nu nog niet verwijderd worden, dus nieuwe uploads mogen alleen aanvullen
+    // tot die grens.
+    var maxFiles = Math.max(0, 10 - existingImageCount);
+    var selectedImageFiles = [];
+
+    function syncInput() {
+      var dt = new DataTransfer();
+      selectedImageFiles.forEach(function (file) { dt.items.add(file); });
+      input.files = dt.files;
+    }
+
+    // Chrome/Firefox/Edge kunnen HEIC/HEIF niet decoderen in een <img> —
+    // dat lukt alleen in Safari. Voor die bestanden tonen we daarom een
+    // placeholder met bestandsnaam i.p.v. een kapot plaatje-icoon; de echte
+    // conversie naar een weergeefbaar formaat gebeurt toch al server-side.
+    function isHeicFile(file) {
+      var name = file.name.toLowerCase();
+      return name.endsWith('.heic') || name.endsWith('.heif') || file.type === 'image/heic' || file.type === 'image/heif';
+    }
+
+    function renderPreview() {
+      preview.innerHTML = '';
+      selectedImageFiles.forEach(function (file, index) {
+        var wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative;width:60px;height:45px;';
+
+        if (isHeicFile(file)) {
+          var placeholder = document.createElement('div');
+          placeholder.style.cssText = 'width:60px;height:45px;border-radius:3px;border:2px solid var(--accent);background:var(--panel-2);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;font-size:9px;line-height:1.2;text-align:center;color:var(--ink-soft);padding:2px;box-sizing:border-box;';
+          placeholder.innerHTML = '📷<span style="display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + file.name + '</span>';
+          wrapper.appendChild(placeholder);
+
+          // Geen echte thumbnail mogelijk voor HEIC, maar een vinkje maakt
+          // duidelijk dat het bestand wél geaccepteerd is (geen foutstatus).
+          var okBadge = document.createElement('span');
+          okBadge.textContent = '✓';
+          okBadge.setAttribute('aria-label', i18n.fileAcceptedAria);
+          okBadge.style.cssText = 'position:absolute;bottom:-6px;left:-6px;width:16px;height:16px;border-radius:50%;background:#2e8b57;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;';
+          wrapper.appendChild(okBadge);
+        } else {
+          var img = document.createElement('img');
+          img.style.cssText = 'width:60px;height:45px;object-fit:cover;border-radius:3px;border:2px solid var(--accent);display:block;';
+          var reader = new FileReader();
+          reader.onload = function (ev) { img.src = ev.target.result; };
+          reader.readAsDataURL(file);
+          wrapper.appendChild(img);
+        }
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.textContent = '×';
+        removeBtn.setAttribute('aria-label', i18n.removePhotoAria);
+        removeBtn.style.cssText = 'appearance:none;-webkit-appearance:none;box-sizing:border-box;margin:0;position:absolute;top:-9px;right:-9px;width:18px;height:18px;border-radius:50%;border:none;background:#c0392b;color:#fff;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;';
+        removeBtn.addEventListener('click', function () {
+          selectedImageFiles.splice(index, 1);
+          syncInput();
+          renderPreview();
+        });
+
+        wrapper.appendChild(removeBtn);
+        preview.appendChild(wrapper);
+      });
+
+      status.textContent = selectedImageFiles.length
+        ? i18n.photosSelected.replace('{{count}}', selectedImageFiles.length).replace('{{max}}', maxFiles)
+        : '';
+    }
+
+    input.addEventListener('change', function () {
+      var incoming = Array.from(input.files);
+      var combined = selectedImageFiles.concat(incoming);
+      var truncated = combined.length > maxFiles;
+      selectedImageFiles = combined.slice(0, maxFiles);
+      syncInput();
+      renderPreview();
+      if (truncated) {
+        status.textContent = i18n.photosMax.replace('{{max}}', maxFiles);
+      }
+    });
+  })();
+
+  // AI-omschrijving: stuurt alleen wat nu in het formulier staat naar de
+  // server (niets wordt opgeslagen) en zet het resultaat in het tekstveld.
+  // Eerste klik toont eerst de sfeer-vragen (niet op de advertentie zelf
+  // zichtbaar, alleen voor deze prompt) — pas de tweede klik genereert echt.
+  document.getElementById('generate-description-btn').addEventListener('click', function () {
+    var btn = this;
+    var vibePanel = document.getElementById('vibe-questions');
+    if (vibePanel.style.display === 'none') {
+      vibePanel.style.display = 'block';
+      btn.textContent = i18n.generateDescriptionConfirm;
+      return;
+    }
+
+    var status = document.getElementById('generate-description-status');
+    var form = document.getElementById('listing-form');
+    var fieldNames = ['doll_name', 'length_cm', 'weight_kg', 'body_type', 'origin_region', 'skin_tone', 'hair_color', 'price', 'location', 'neighborhood'];
+    var vibeFieldNames = ['first_impression', 'meeting_atmosphere', 'desired_impression', 'visitor_expectation'];
+
+    var missing = fieldNames.filter(function (name) {
+      var el = form.elements[name];
+      return !el || !el.value;
+    });
+    if (missing.length) {
+      status.textContent = i18n.missingFields;
+      return;
+    }
+
+    var missingVibe = vibeFieldNames.filter(function (name) {
+      var el = form.elements[name];
+      return !el || !el.value;
+    });
+    if (missingVibe.length) {
+      status.textContent = i18n.missingVibeFields;
+      return;
+    }
+
+    var params = new URLSearchParams();
+    fieldNames.forEach(function (name) { params.append(name, form.elements[name].value); });
+    vibeFieldNames.forEach(function (name) { params.append(name, form.elements[name].value); });
+    form.querySelectorAll('input[name="languages"]:checked').forEach(function (cb) { params.append('languages', cb.value); });
+
+    btn.disabled = true;
+    status.textContent = i18n.generating;
+
+    fetch('/listings/generate-description', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+      .then(function (result) {
+        if (result.ok) {
+          document.getElementById('description').value = result.data.description;
+          status.textContent = '';
+        } else {
+          status.textContent = result.data.error || i18n.generateFailed;
+        }
+      })
+      .catch(function () {
+        status.textContent = i18n.generateFailedConnection;
+      })
+      .finally(function () {
+        btn.disabled = false;
+      });
+  });
+
+  // Digits-only so "1.57" (meant as 1.57 m) becomes "157" instead of being
+  // parsed as a decimal — the period/comma is just stripped as you type.
+  ['age', 'length_cm', 'weight_kg'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', function (e) {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+  });
+
+  (function () {
+    var locationInput = document.getElementById('location');
+    var suggestionsBox = document.getElementById('location-suggestions');
+    var locationError = document.getElementById('location-error');
+    var neighborhoodSelect = document.getElementById('neighborhood');
+    var initialNeighborhood = <%- JSON.stringify(listing.neighborhood || '') %>;
+
+    var allCities = [];
+    var locationConfirmed = false;
+
+    function renderSuggestions(matches) {
+      suggestionsBox.innerHTML = '';
+      if (!matches.length) {
+        suggestionsBox.style.display = 'none';
+        return;
+      }
+      matches.slice(0, 8).forEach(function (name) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = name;
+        btn.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          selectCity(name);
+        });
+        suggestionsBox.appendChild(btn);
+      });
+      suggestionsBox.style.display = 'block';
+    }
+
+    function loadNeighborhoods(city, preselect) {
+      neighborhoodSelect.disabled = true;
+      neighborhoodSelect.innerHTML = '<option value="">' + i18n.loadingNeighborhoods + '</option>';
+
+      fetch('/geocode/neighborhoods?city=' + encodeURIComponent(city))
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          neighborhoodSelect.innerHTML = '<option value="">' + i18n.chooseNeighborhood + '</option>';
+          (data.neighborhoods || []).forEach(function (n) {
+            var opt = document.createElement('option');
+            opt.value = n.value;
+            opt.textContent = n.label;
+            if (preselect && n.value === preselect) opt.selected = true;
+            neighborhoodSelect.appendChild(opt);
+          });
+          neighborhoodSelect.disabled = false;
+        })
+        .catch(function () {
+          neighborhoodSelect.innerHTML = '<option value="">' + i18n.neighborhoodsFailed + '</option>';
+        });
+    }
+
+    function selectCity(name, preselectNeighborhood) {
+      locationInput.value = name;
+      locationConfirmed = true;
+      locationError.style.display = 'none';
+      suggestionsBox.style.display = 'none';
+      loadNeighborhoods(name, preselectNeighborhood);
+    }
+
+    fetch('/geocode/cities')
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        allCities = data.cities || [];
+
+        if (locationInput.value) {
+          var existing = allCities.find(function (c) { return c.toLowerCase() === locationInput.value.toLowerCase(); });
+          if (existing) selectCity(existing, initialNeighborhood);
+        }
+      });
+
+    locationInput.addEventListener('input', function () {
+      locationConfirmed = false;
+      neighborhoodSelect.disabled = true;
+      neighborhoodSelect.innerHTML = '<option value="">' + i18n.neighborhoodChooseCityFirst + '</option>';
+
+      var term = locationInput.value.trim().toLowerCase();
+      if (!term) {
+        suggestionsBox.style.display = 'none';
+        return;
+      }
+      renderSuggestions(allCities.filter(function (c) { return c.toLowerCase().indexOf(term) !== -1; }));
+    });
+
+    locationInput.addEventListener('blur', function () {
+      setTimeout(function () {
+        suggestionsBox.style.display = 'none';
+        if (!locationConfirmed) {
+          locationError.style.display = locationInput.value ? 'block' : 'none';
+        }
+      }, 150);
+    });
+
+    document.getElementById('listing-form').addEventListener('submit', function (e) {
+      if (!locationConfirmed || !neighborhoodSelect.value) {
+        e.preventDefault();
+        if (!locationConfirmed) {
+          locationError.style.display = 'block';
+          locationInput.focus();
+        } else {
+          neighborhoodSelect.focus();
+        }
+        return;
+      }
+
+      var languagesError = document.getElementById('languages-error');
+      var anyLanguageChecked = document.querySelectorAll('input[name="languages"]:checked').length > 0;
+      languagesError.style.display = anyLanguageChecked ? 'none' : 'block';
+      if (!anyLanguageChecked) {
+        e.preventDefault();
+        return;
+      }
+
+      var imagesStatus = document.getElementById('images-status');
+      var totalPhotos = existingImageCount + document.getElementById('images').files.length;
+      if (totalPhotos < 4) {
+        e.preventDefault();
+        imagesStatus.textContent = i18n.photosMin;
+        return;
+      }
+      if (totalPhotos > 10) {
+        e.preventDefault();
+        imagesStatus.textContent = i18n.photosMax.replace('{{max}}', 10);
+      }
+    });
+
+    document.getElementById('use-location-btn').addEventListener('click', function () {
+      var status = document.getElementById('use-location-status');
+      var btn = this;
+
+      if (!navigator.geolocation) {
+        status.textContent = i18n.geolocationUnsupported;
+        return;
+      }
+
+      btn.disabled = true;
+      status.textContent = i18n.locating;
+
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          var lat = position.coords.latitude;
+          var lng = position.coords.longitude;
+
+          fetch('/geocode/reverse?lat=' + lat + '&lng=' + lng)
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data.city) {
+                selectCity(data.city, data.neighborhood);
+                status.textContent = data.neighborhood ? '' : i18n.cityFoundPickNeighborhood;
+              } else {
+                status.textContent = i18n.locationNoMatch;
+              }
+            })
+            .catch(function () {
+              status.textContent = i18n.locationFailed;
+            })
+            .finally(function () {
+              btn.disabled = false;
+            });
+        },
+        function () {
+          status.textContent = i18n.locationDenied;
+          btn.disabled = false;
+        }
+      );
+    });
+  })();
+</script>
+
+<%- include('partials/footer') %>

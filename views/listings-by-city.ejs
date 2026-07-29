@@ -1,0 +1,26 @@
+<%- include('partials/header') %>
+
+<div class="container" style="padding-top:28px;">
+  <a href="<%= locale === 'en' ? '/en' : '/' %>" style="font-size:13px;color:var(--ink-soft)"><%= t('listing_city.back_home') %></a>
+
+  <div class="page-head" style="margin-top:12px;">
+    <h1><%= t('listing_city.heading', { location: location }) %></h1>
+    <span class="result-count"><%= t('index.results_count', { count: listings.length }) %></span>
+  </div>
+
+  <% if (listings.length === 0) { %>
+    <div class="empty-state">
+      <p><%= t('index.empty_state') %></p>
+      <a href="<%= locale === 'en' ? '/en' : '/' %>" class="btn btn-outline"><%= t('index.clear_filters') %></a>
+    </div>
+  <% } else { %>
+    <%- include('partials/view-toggle') %>
+    <div class="listing-grid" id="listing-grid">
+      <% listings.forEach(function(listing) { %>
+        <%- include('partials/listing-card', { listing: listing }) %>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

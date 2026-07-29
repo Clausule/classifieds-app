@@ -1,0 +1,61 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="padding-top:28px;">
+  <h1>Gebruikers beheren</h1>
+  <div class="admin-tabs">
+    <a href="/admin">Overzicht</a>
+    <a href="/admin/listings">Listings</a>
+    <a href="/admin/verificaties">Verificaties</a>
+    <a href="/admin/users" class="active">Gebruikers</a>
+    <a href="/admin/messages">Support inbox</a>
+    <a href="/admin/reports">Meldingen</a>
+    <a href="/admin/instellingen">Instellingen</a>
+  </div>
+
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Naam</th><th>E-mail</th><th>Saldo</th>
+        <th>Listings</th><th>Gegevens</th><th>Status</th><th>Lid sinds</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(function(u) { %>
+        <tr>
+          <td><%= u.profile_first_name ? (u.profile_first_name + ' ' + u.profile_last_name) : '—' %></td>
+          <td><%= u.email %></td>
+          <td><%= u.credit_balance %> <%= u.credit_balance === 1 ? 'credit' : 'credits' %></td>
+          <td>
+            <% if (u.listing_count > 0) { %>
+              <a href="/admin/listings?status=all&user_id=<%= u.id %>"><%= u.listing_count %></a>
+            <% } else { %>
+              0
+            <% } %>
+          </td>
+          <td>
+            <% if (u.profile_id) { %>
+              <% var profileStatusLabels = { pending: 'in behandeling', approved: 'goedgekeurd', rejected: 'afgewezen' }; %>
+              <a href="/admin/verificaties/<%= u.profile_id %>" class="badge badge-<%= u.profile_status === 'approved' ? 'active' : u.profile_status %>" style="text-decoration:none;">
+                <%= profileStatusLabels[u.profile_status] || u.profile_status %>
+              </a>
+            <% } else { %>
+              <span class="badge badge-pending">Geen profiel</span>
+            <% } %>
+          </td>
+          <td><span class="badge <%= u.is_active ? 'badge-active' : 'badge-rejected' %>"><%= u.is_active ? 'actief' : 'gedeactiveerd' %></span></td>
+          <td><%= new Date(u.created_at).toLocaleDateString('nl-NL') %></td>
+          <td style="white-space:nowrap;">
+            <a href="/admin/messages/<%= u.id %>" class="btn btn-sm btn-outline">Bericht sturen</a>
+            <form action="/admin/users/<%= u.id %>/toggle-active" method="POST" style="display:inline">
+              <button type="submit" class="btn btn-sm <%= u.is_active ? 'btn-danger' : 'btn-outline' %>">
+                <%= u.is_active ? 'Deactiveren' : 'Activeren' %>
+              </button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

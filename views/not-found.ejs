@@ -1,0 +1,12 @@
+<%- include('partials/header') %>
+
+<div class="container not-found">
+  <div class="not-found-stage">
+    <img src="/images/dog-404.png" alt="<%= t('not_found.image_alt') %>" class="not-found-dog">
+  </div>
+  <h1><%= t('not_found.title') %></h1>
+  <p><%= t('not_found.message') %></p>
+  <a href="<%= locale === 'en' ? '/en' : '/' %>" class="btn btn-brand"><%= t('not_found.back_home') %></a>
+</div>
+
+<%- include('partials/footer') %>

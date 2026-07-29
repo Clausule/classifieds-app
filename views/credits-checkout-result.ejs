@@ -1,0 +1,41 @@
+<%- include('partials/header') %>
+
+<div class="container auth-shell">
+  <div class="card" style="text-align:center;">
+    <% if (purchase.status === 'paid') { %>
+      <span class="badge badge-active" style="margin-bottom:12px;"><%= t('credits_result.paid_badge') %></span>
+      <h1><%= t('credits_result.paid_heading', { count: purchase.credits }) %></h1>
+      <% if (purchase.activate_listing_id) { %>
+        <p class="form-hint"><%= t('credits_result.paid_listing_activated', { name: purchase.activated_listing_name }) %></p>
+      <% } else { %>
+        <p class="form-hint"><%= t('credits_result.paid_balance_ready') %></p>
+      <% } %>
+    <% } else if (purchase.status === 'failed') { %>
+      <span class="badge badge-rejected" style="margin-bottom:12px;"><%= t('credits_result.failed_badge') %></span>
+      <h1><%= t('credits_result.failed_heading') %></h1>
+      <p class="form-hint"><%= t('credits_result.failed_hint') %></p>
+    <% } else if (purchase.status === 'expired') { %>
+      <span class="badge badge-expired" style="margin-bottom:12px;"><%= t('credits_result.expired_badge') %></span>
+      <h1><%= t('credits_result.expired_heading') %></h1>
+      <p class="form-hint"><%= t('credits_result.expired_hint') %></p>
+    <% } else if (purchase.status === 'canceled') { %>
+      <span class="badge badge-pending" style="margin-bottom:12px;"><%= t('credits_result.canceled_badge') %></span>
+      <h1><%= t('credits_result.canceled_heading') %></h1>
+      <p class="form-hint"><%= t('credits_result.canceled_hint') %></p>
+    <% } else { %>
+      <span class="badge badge-pending" style="margin-bottom:12px;"><%= t('credits_result.pending_badge') %></span>
+      <h1><%= t('credits_result.pending_heading') %></h1>
+      <p class="form-hint"><%= t('credits_result.pending_hint') %></p>
+    <% } %>
+
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+      <% if (purchase.activate_listing_id && purchase.activated_listing_slug) { %>
+        <a href="/listings/<%= purchase.activated_listing_slug %>" class="btn btn-outline"><%= t('credits_result.view_listing') %></a>
+      <% } %>
+      <a href="/account/credits" class="btn btn-outline"><%= t('credits_result.to_credits') %></a>
+      <a href="/dashboard" class="btn btn-brand"><%= t('credits_result.to_dashboard') %></a>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

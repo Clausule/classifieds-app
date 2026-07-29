@@ -1,0 +1,9 @@
+<%- include('partials/header') %>
+
+<div class="container" style="padding-top:60px;text-align:center;">
+  <h1><%= t(title) %></h1>
+  <p style="color:var(--ink-soft);"><%= t(message) %></p>
+  <a href="<%= locale === 'en' ? '/en' : '/' %>" class="btn btn-outline" style="margin-top:12px;"><%= t('error.back_home') %></a>
+</div>
+
+<%- include('partials/footer') %>

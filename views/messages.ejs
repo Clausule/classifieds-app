@@ -1,0 +1,41 @@
+<%- include('partials/header') %>
+
+<div class="container" style="max-width:680px;padding-top:28px;">
+  <h1><%= t('messages.title') %></h1>
+  <p class="form-hint"><%= t('messages.hint') %></p>
+
+  <div class="message-thread">
+    <% if (messages.length === 0) { %>
+      <div class="empty-state"><%= t('messages.empty_state') %></div>
+    <% } %>
+    <% messages.forEach(function(m) { %>
+      <div class="msg msg-<%= m.sender %>">
+        <% if (m.listing_title) { %><div style="font-size:11px;opacity:0.7;margin-bottom:4px;"><%= t('messages.about_prefix') %> <%= m.listing_title %></div><% } %>
+        <div><%= m.body %></div>
+        <div class="msg-meta">
+          <%= new Date(m.created_at).toLocaleString(locale === 'en' ? 'en-US' : 'nl-NL') %>
+          <% if (m.channel === 'whatsapp') { %><span class="badge badge-active" style="margin-left:6px;"><%= t('messages.via_whatsapp') %></span><% } %>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <form method="POST" action="/dashboard/messages" class="card">
+    <div class="form-row">
+      <label for="listing_id"><%= t('messages.listing_select_label') %></label>
+      <select id="listing_id" name="listing_id">
+        <option value=""><%= t('messages.no_specific_listing') %></option>
+        <% listings.forEach(function(l) { %>
+          <option value="<%= l.id %>"><%= l.doll_name %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="form-row">
+      <label for="body"><%= t('messages.body_label') %></label>
+      <textarea id="body" name="body" required placeholder="<%= t('messages.body_placeholder') %>"></textarea>
+    </div>
+    <button type="submit" class="btn btn-brand"><%= t('messages.submit') %></button>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,299 @@
+<%- include('partials/header') %>
+
+<%
+  var selectedPrices = ([]).concat(query.price || []).map(String);
+  function buildQueryString(overrides) {
+    var params = new URLSearchParams();
+    var merged = Object.assign({}, query, overrides);
+    Object.keys(merged).forEach(function (key) {
+      var val = merged[key];
+      if (val === undefined || val === null || val === '') return;
+      if (Array.isArray(val)) {
+        val.forEach(function (v) { if (v !== '') params.append(key, v); });
+      } else {
+        params.append(key, val);
+      }
+    });
+    return params.toString();
+  }
+  var hasActiveFilters = !!(query.q || query.city || query.neighborhood || query.radius || selectedPrices.length);
+  var nearHint = query.near === '1' ? t('index.near_hint') : null;
+%>
+
+<div class="search-bar">
+  <div class="container">
+    <form class="search-form" method="GET" action="/">
+      <div class="field search-field<%= query.q ? ' expanded' : '' %>" id="search-field">
+        <button type="button" class="search-toggle" id="search-toggle" aria-label="<%= t('index.search_aria') %>" title="<%= t('index.search_aria') %>">🔍</button>
+        <input type="text" id="q" name="q" placeholder="<%= t('index.search_placeholder') %>" value="<%= query.q || '' %>">
+      </div>
+      <div class="field-group">
+        <div class="field" style="position:relative;">
+          <label for="city"><%= t('index.city_label') %></label>
+          <input type="text" id="city" name="city" autocomplete="off" placeholder="<%= t('index.city_placeholder') %>" value="<%= query.city || '' %>" <%= (query.city && !cityHasListings) ? 'style="color:var(--ink-soft);"' : '' %>>
+          <div id="city-suggestions" class="suggestions-list" style="display:none;"></div>
+        </div>
+        <% if (!query.city) { %>
+          <button type="button" id="use-location-btn" class="use-location-link">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-7.58 7-12.5A7 7 0 0 0 5 9.5C5 14.42 12 22 12 22Z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
+            <%= t('index.use_location') %>
+          </button>
+          <p class="form-hint" id="use-location-status"></p>
+        <% } %>
+      </div>
+      <% if (query.city && (neighborhoods.length || query.neighborhood)) { %>
+        <div class="field">
+          <label for="neighborhood"><%= t('index.neighborhood_label') %></label>
+          <select id="neighborhood" name="neighborhood">
+            <option value="" <%= !query.neighborhood ? 'selected' : '' %>><%= t('index.neighborhood_placeholder') %></option>
+            <% neighborhoods.forEach(function(n) { %>
+              <option value="<%= n %>" <%= query.neighborhood === n ? 'selected' : '' %>><%= n %></option>
+            <% }) %>
+            <% if (query.neighborhood && !neighborhoods.includes(query.neighborhood)) { %>
+              <%
+                // "Gebruik mijn locatie" kan een écht bestaande buurt herkennen
+                // die (nog) geen advertenties heeft — die moet wél zichtbaar
+                // gekozen blijven staan i.p.v. stilzwijgend terug te vallen op
+                // "Alle buurten", alleen subtiel anders gestyled.
+              %>
+              <option value="<%= query.neighborhood %>" selected style="color:var(--ink-soft);"><%= query.neighborhood %></option>
+            <% } %>
+          </select>
+        </div>
+      <% } %>
+      <div class="field">
+        <label for="radius"><%= t('index.radius_label') %></label>
+        <select id="radius" name="radius">
+          <option value="" <%= !query.radius ? 'selected' : '' %>><%= query.neighborhood ? t('index.radius_neighborhood_only') : t('index.radius_city_only') %></option>
+          <% [5, 10, 15, 30, 50].forEach(function(km) { %>
+            <option value="<%= km %>" <%= Number(query.radius) === km ? 'selected' : '' %>>+<%= km %> km</option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="price-plates<%= selectedPrices.length ? ' has-selection' : '' %>" id="price-plates">
+        <% [50, 60, 70, 80].forEach(function(p) { %>
+          <label class="plate price-tier-<%= p %><%= selectedPrices.includes(String(p)) ? ' selected' : '' %>" title="€<%= p %>">
+            <input type="checkbox" name="price" value="<%= p %>" <%= selectedPrices.includes(String(p)) ? 'checked' : '' %>>
+            <span class="plate-price">€<%= p %></span>
+          </label>
+        <% }) %>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var cities = <%- JSON.stringify(cities) %>;
+    var input = document.getElementById('city');
+    var box = document.getElementById('city-suggestions');
+
+    // Een andere stad kiezen maakt de eerder gekozen buurt (van de vorige
+    // stad) ongeldig — anders blijft die als filter hangen en levert de
+    // combinatie stilletjes 0 resultaten op.
+    function clearNeighborhood() {
+      var neighborhoodSelect = document.getElementById('neighborhood');
+      if (neighborhoodSelect) neighborhoodSelect.value = '';
+    }
+
+    function render(matches) {
+      box.innerHTML = '';
+      if (!matches.length) {
+        box.style.display = 'none';
+        return;
+      }
+      matches.slice(0, 8).forEach(function (name) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = name;
+        btn.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          input.value = name;
+          box.style.display = 'none';
+          clearNeighborhood();
+          input.form.submit();
+        });
+        box.appendChild(btn);
+      });
+      box.style.display = 'block';
+    }
+
+    input.addEventListener('input', function () {
+      var term = input.value.trim().toLowerCase();
+      if (!term) {
+        box.style.display = 'none';
+        return;
+      }
+      render(cities.filter(function (c) { return c.toLowerCase().indexOf(term) !== -1; }));
+    });
+
+    input.addEventListener('blur', function () {
+      setTimeout(function () { box.style.display = 'none'; }, 150);
+    });
+
+    // Geen submit-knop meer — Enter moet hier ook gewoon werken.
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        clearNeighborhood();
+        input.form.submit();
+      }
+    });
+  })();
+
+  // Zoekveld inklappen/uitklappen — staat al open als er een actieve zoekterm is.
+  // Geen submit-knop meer, dus Enter in dit veld moet zelf het formulier versturen.
+  (function () {
+    var field = document.getElementById('search-field');
+    var toggle = document.getElementById('search-toggle');
+    var input = document.getElementById('q');
+
+    toggle.addEventListener('click', function () {
+      var expanded = field.classList.toggle('expanded');
+      if (expanded) input.focus();
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') input.form.submit();
+    });
+  })();
+
+  // Straal: direct opnieuw zoeken zodra je een andere afstand kiest. Is een
+  // buurt gekozen, dan geldt de straal t.o.v. die buurt i.p.v. de hele stad
+  // (zie server-side WHERE-opbouw) — geen reden om ze elkaar te laten wissen.
+  document.getElementById('radius').addEventListener('change', function () {
+    this.form.submit();
+  });
+
+  // Buurt: direct opnieuw zoeken zodra je een andere buurt kiest.
+  (function () {
+    var neighborhoodSelect = document.getElementById('neighborhood');
+    if (neighborhoodSelect) {
+      neighborhoodSelect.addEventListener('change', function () {
+        this.form.submit();
+      });
+    }
+  })();
+
+  // Prijs-bordjes: aan/uit klikken filtert meteen, geen submit-knop meer nodig.
+  (function () {
+    var group = document.getElementById('price-plates');
+    var plates = group.querySelectorAll('.plate');
+
+    function sync() {
+      var anySelected = false;
+      plates.forEach(function (plate) {
+        var checked = plate.querySelector('input').checked;
+        plate.classList.toggle('selected', checked);
+        if (checked) anySelected = true;
+      });
+      group.classList.toggle('has-selection', anySelected);
+    }
+
+    plates.forEach(function (plate) {
+      plate.querySelector('input').addEventListener('change', function () {
+        sync();
+        if (typeof gtag === 'function') {
+          gtag('event', 'price_filter_click', { price: this.value, checked: this.checked });
+        }
+        group.closest('form').submit();
+      });
+    });
+  })();
+
+  // "Gebruik mijn locatie": reverse-geocode + oplopend zoeken gebeurt
+  // server-side (zie /geocode/nearby-listings) — hier alleen navigeren naar
+  // de resulterende filter-URL, zodat de server de buurt-dropdown correct
+  // meerendert (die <select> bestaat hier soms nog niet eens in de DOM, want
+  // verschijnt pas zodra er al een stad gekozen is). Straal wordt altijd
+  // meegestuurd (minimaal 5km, ook bij een exacte buurt-match) zodat er
+  // meteen wat te zien is rond de gevonden locatie, niet alleen de ene
+  // exacte buurt.
+  (function () {
+    var btn = document.getElementById('use-location-btn');
+    var status = document.getElementById('use-location-status');
+    if (!btn) return;
+
+    var i18n = <%- JSON.stringify({
+      geolocationUnsupported: t('index.js.geolocation_unsupported'),
+      locating: t('index.js.locating'),
+      locationDenied: t('index.js.location_denied'),
+      locationFailed: t('index.js.location_failed'),
+      locationNoMatch: t('index.js.location_no_match'),
+    }) %>;
+
+    btn.addEventListener('click', function () {
+      if (typeof gtag === 'function') gtag('event', 'use_location_click');
+
+      if (!navigator.geolocation) {
+        status.textContent = i18n.geolocationUnsupported;
+        return;
+      }
+
+      btn.disabled = true;
+      status.textContent = i18n.locating;
+
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          var lat = position.coords.latitude;
+          var lng = position.coords.longitude;
+
+          fetch('/geocode/nearby-listings?lat=' + lat + '&lng=' + lng)
+            .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+            .then(function (result) {
+              if (!result.ok || !result.data.city) {
+                status.textContent = i18n.locationNoMatch;
+                btn.disabled = false;
+                return;
+              }
+              var params = new URLSearchParams();
+              params.set('city', result.data.city);
+              if (result.data.neighborhood) params.set('neighborhood', result.data.neighborhood);
+              params.set('radius', result.data.radius || 5);
+              params.set('near', '1');
+              window.location.href = '<%= locale === "en" ? "/en" : "" %>/?' + params.toString();
+            })
+            .catch(function () {
+              status.textContent = i18n.locationFailed;
+              btn.disabled = false;
+            });
+        },
+        function () {
+          status.textContent = i18n.locationDenied;
+          btn.disabled = false;
+        }
+      );
+    });
+  })();
+</script>
+
+<div class="container">
+  <% if (listings.length === 0) { %>
+    <div class="empty-state">
+      <p><%= t('index.empty_state') %></p>
+      <a href="<%= locale === 'en' ? '/en' : '/' %>" class="btn btn-outline"><%= t('index.clear_filters') %></a>
+    </div>
+  <% } else { %>
+    <%- include('partials/view-toggle', { showReset: hasActiveFilters, nearHint: nearHint }) %>
+    <div class="listing-grid" id="listing-grid">
+      <% listings.forEach(function(listing) { %>
+        <%- include('partials/listing-card', { listing: listing }) %>
+      <% }) %>
+    </div>
+
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% for (let p = 1; p <= totalPages; p++) { %>
+          <% if (p === page) { %>
+            <span class="current"><%= p %></span>
+          <% } else { %>
+            <a href="?<%= buildQueryString({ page: p }) %>"><%= p %></a>
+          <% } %>
+        <% } %>
+      </div>
+    <% } %>
+  <% } %>
+</div>
+
+<%- include('partials/seo-content') %>
+
+<%- include('partials/footer') %>

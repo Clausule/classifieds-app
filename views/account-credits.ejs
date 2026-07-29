@@ -1,0 +1,80 @@
+<%- include('partials/header') %>
+
+<div class="container" style="max-width:560px;padding-top:28px;">
+  <h1><%= t('credits.title') %></h1>
+
+  <div class="card" style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:13px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.05em;"><%= t('credits.balance_label') %></div>
+    <div style="font-size:48px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin:6px 0;"><%= balance %> <span style="font-size:20px;font-weight:600;color:var(--ink-soft);"><%= t(balance === 1 ? 'common.credit_singular' : 'common.credit_plural') %></span></div>
+    <div style="font-size:14px;color:var(--ink-soft);">&asymp; &euro;<%= (balance * pricePerCredit).toFixed(2).replace('.', locale === 'en' ? '.' : ',') %></div>
+    <p class="form-hint" style="margin-top:10px;"><%= t('credits.hint', { price: pricePerCredit.toFixed(2).replace('.', locale === 'en' ? '.' : ',') }) %></p>
+  </div>
+
+  <% if (noCredits) { %><div class="alert" style="background:var(--gold-bg);color:var(--gold);"><%= t('credits.no_credits') %></div><% } %>
+  <% if (error) { %><div class="alert alert-error"><%= t(error) %></div><% } %>
+
+  <div class="card">
+    <h3 style="margin-top:0;"><%= t('credits.buy_heading') %></h3>
+    <form method="POST" action="/account/credits/buy" id="buy-credits-form">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <% presets.forEach(function(n) { %>
+          <button type="button" class="btn btn-outline preset-btn" data-credits="<%= n %>" style="flex:1;min-width:70px;"><%= n %></button>
+        <% }) %>
+      </div>
+      <div class="form-row">
+        <label for="credits"><%= t('credits.custom_amount_label') %></label>
+        <input type="number" id="credits" name="credits" min="1" max="999" required placeholder="<%= t('credits.custom_amount_placeholder') %>">
+      </div>
+      <div class="form-row" id="buy-total" style="display:none;">
+        <p class="form-hint"><%= t('credits.total_prefix') %> <strong id="buy-total-amount"></strong></p>
+      </div>
+      <button type="submit" class="btn btn-brand btn-block"><%= t('credits.checkout') %></button>
+    </form>
+  </div>
+
+  <% if (history.length) { %>
+    <div class="card" style="margin-top:20px;">
+      <h3 style="margin-top:0;"><%= t('credits.recent_history') %></h3>
+      <table style="width:100%;font-size:14px;">
+        <% history.forEach(function(h) { %>
+          <tr>
+            <td style="color:var(--ink-soft);padding:5px 0;"><%= new Date(h.created_at + 'Z').toLocaleDateString(locale === 'en' ? 'en-US' : 'nl-NL') %></td>
+            <td style="padding:5px 0;"><%= t('enum.credit_reason.' + h.reason) %></td>
+            <td style="padding:5px 0;text-align:right;color:<%= h.amount > 0 ? 'var(--green)' : 'var(--ink)' %>;"><%= h.amount > 0 ? '+' : '' %><%= h.amount %></td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<script>
+  (function () {
+    var pricePerCredit = <%= pricePerCredit %>;
+    var creditsLabel = <%- JSON.stringify(t('credits.js.total')) %>;
+    var creditsInput = document.getElementById('credits');
+    var totalRow = document.getElementById('buy-total');
+    var totalAmount = document.getElementById('buy-total-amount');
+
+    function updateTotal() {
+      var n = parseInt(creditsInput.value, 10);
+      if (!n || n < 1) {
+        totalRow.style.display = 'none';
+        return;
+      }
+      totalAmount.textContent = creditsLabel.replace('{{count}}', n).replace('{{amount}}', (n * pricePerCredit).toFixed(2).replace('.', ','));
+      totalRow.style.display = 'block';
+    }
+
+    document.querySelectorAll('.preset-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        creditsInput.value = btn.dataset.credits;
+        updateTotal();
+      });
+    });
+
+    creditsInput.addEventListener('input', updateTotal);
+  })();
+</script>
+
+<%- include('partials/footer') %>

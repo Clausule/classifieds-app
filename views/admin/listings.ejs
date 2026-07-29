@@ -1,0 +1,113 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="padding-top:28px;">
+  <h1>Listings beheren</h1>
+  <div class="admin-tabs">
+    <a href="/admin">Overzicht</a>
+    <a href="/admin/listings" class="active">Listings</a>
+    <a href="/admin/verificaties">Verificaties</a>
+    <a href="/admin/users">Gebruikers</a>
+    <a href="/admin/messages">Support inbox</a>
+    <a href="/admin/reports">Meldingen</a>
+    <a href="/admin/instellingen">Instellingen</a>
+  </div>
+
+  <% var statusLabels = { deleted: 'Verwijderd' }; %>
+  <% var rowStatusLabels = { active: 'Actief', suspended: 'Geschorst', rejected: 'Afgewezen', deleted: 'Verwijderd' }; %>
+  <% var userIdParam = typeof filteredUser !== 'undefined' && filteredUser ? '&user_id=' + filteredUser.id : ''; %>
+  <div class="admin-tabs" style="border-bottom:none;margin-bottom:14px;">
+    <% ['pending', 'active', 'suspended', 'rejected', 'expired', 'deleted', 'all'].forEach(function(s) { %>
+      <a href="/admin/listings?status=<%= s %><%= userIdParam %>" class="<%= currentStatus === s ? 'active' : '' %>" style="text-transform:capitalize;"><%= statusLabels[s] || s %></a>
+    <% }) %>
+  </div>
+
+  <% if (typeof filteredUser !== 'undefined' && filteredUser) { %>
+    <div class="alert" style="background:var(--gold-bg);color:var(--gold);display:flex;justify-content:space-between;align-items:center;">
+      <span>Gefilterd op <strong><%= filteredUser.name %></strong></span>
+      <a href="/admin/listings?status=<%= currentStatus %><%= q ? '&q=' + encodeURIComponent(q) : '' %>" style="color:inherit;">Filter wissen ×</a>
+    </div>
+  <% } %>
+
+  <form method="GET" action="/admin/listings" style="display:flex;gap:8px;margin-bottom:14px;">
+    <input type="hidden" name="status" value="<%= currentStatus %>">
+    <% if (typeof filteredUser !== 'undefined' && filteredUser) { %><input type="hidden" name="user_id" value="<%= filteredUser.id %>"><% } %>
+    <input type="text" name="q" value="<%= q || '' %>" placeholder="Zoek op naam, roepnaam, e-mail of advertentienummer..." style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;">
+    <button type="submit" class="btn btn-sm btn-outline">Zoeken</button>
+    <% if (q) { %><a href="/admin/listings?status=<%= currentStatus %><%= userIdParam %>" class="btn btn-sm btn-outline">Wissen</a><% } %>
+  </form>
+
+  <% if (listings.length === 0) { %>
+    <div class="empty-state">Geen listings in deze status.</div>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr><th style="width:70px;">Nummer</th><th>Naam</th><th>Status</th><th>Premium</th><th></th><th>Bekeken</th><th>Geklikt</th><th>Adverteerder</th></tr>
+      </thead>
+      <tbody>
+        <% listings.forEach(function(l) { %>
+          <tr>
+            <td>#<%= String(l.id).padStart(4, '0') %></td>
+            <td><a href="/listings/<%= l.slug %>"><%= l.doll_name %></a></td>
+            <td>
+              <span class="badge badge-<%= l.status %>"><%= rowStatusLabels[l.status] || l.status %></span>
+              <% if ((l.status === 'pending' || l.status === 'rejected') && l.activated_at) { %>
+                <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;white-space:nowrap;">
+                  Eerder actief sinds <%= new Date(l.activated_at + 'Z').toLocaleDateString('nl-NL') %>
+                </div>
+              <% } %>
+            </td>
+            <td>
+              <form action="/admin/listings/<%= l.id %>/premium" method="POST">
+                <button type="submit" class="btn btn-sm <%= l.is_premium_active ? 'btn-primary' : 'btn-outline' %>">
+                  <%= l.is_premium_active ? '★ Premium (24u)' : '☆ Maak premium (24u)' %>
+                </button>
+              </form>
+              <% if (l.is_premium_active) { %>
+                <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;">
+                  tot <%= new Date(l.premium_until + 'Z').toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
+                  <%= new Date(l.premium_until + 'Z').toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) %>
+                </div>
+              <% } %>
+            </td>
+            <td style="white-space:nowrap;">
+              <% if (l.status === 'pending') { %>
+                <form action="/admin/listings/<%= l.id %>/status" method="POST" style="display:inline">
+                  <input type="hidden" name="status" value="active">
+                  <button type="submit" class="btn btn-sm btn-primary">Goedkeuren</button>
+                </form>
+                <form action="/admin/listings/<%= l.id %>/status" method="POST" style="display:inline-flex;gap:4px;align-items:center;margin-left:4px;">
+                  <input type="hidden" name="status" value="rejected">
+                  <input type="text" name="message" placeholder="Reden (naar adverteerder)" style="width:170px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;">
+                  <button type="submit" class="btn btn-sm btn-danger">Afwijzen</button>
+                </form>
+              <% } else { %>
+                <form action="/admin/listings/<%= l.id %>/status" method="POST" style="display:inline">
+                  <select name="status" onchange="this.form.submit()" class="btn btn-sm btn-outline">
+                    <% ['pending','active','suspended','rejected','expired','deleted'].forEach(function(s) { %>
+                      <option value="<%= s %>" <%= l.status === s ? 'selected' : '' %>><%= rowStatusLabels[s] || s %></option>
+                    <% }) %>
+                  </select>
+                </form>
+              <% } %>
+              <form action="/admin/listings/<%= l.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('Listing definitief verwijderen?')">
+                <button type="submit" class="btn btn-sm btn-danger">Verwijder</button>
+              </form>
+            </td>
+            <td><%= l.views_count %></td>
+            <td><%= l.call_clicks_count %></td>
+            <td>
+              <% if (l.seller_profile_id) { %>
+                <a href="/admin/verificaties/<%= l.seller_profile_id %>"><%= l.seller_name %></a>
+              <% } else { %>
+                <%= l.seller_name %>
+              <% } %>
+              <br><span style="color:var(--ink-soft);font-size:12px;"><%= l.seller_email %></span>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

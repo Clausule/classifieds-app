@@ -1,0 +1,32 @@
+<% if (typeof query !== 'undefined' && query && query.phone_verified) { %>
+  <div class="alert alert-success" style="margin-top:16px;"><%= t('phone_verify.verified') %></div>
+<% } %>
+<% if (!profile.phone_verified_at) { %>
+  <div style="margin-top:16px;">
+    <% if (typeof query !== 'undefined' && query && query.phone_code_invalid) { %>
+      <div class="alert alert-error"><%= t('phone_verify.error.invalid_code') %></div>
+    <% } %>
+    <% if (typeof query !== 'undefined' && query && query.phone_send_failed) { %>
+      <div class="alert alert-error"><%= t('phone_verify.error.send_failed') %></div>
+    <% } %>
+    <% if (typeof query !== 'undefined' && query && query.phone_code_sent) { %>
+      <% if (query.mock_code) { %>
+        <p class="form-hint"><%= t('phone_verify.mock_code_prefix') %> <strong><%= query.mock_code %></strong></p>
+      <% } %>
+      <form method="POST" action="/account/verify/phone/confirm" style="display:flex;gap:8px;align-items:flex-end;margin-top:6px;">
+        <div style="flex:1;">
+          <label for="code"><%= t('phone_verify.code_label') %></label>
+          <input type="text" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" required>
+        </div>
+        <button type="submit" class="btn btn-brand btn-sm"><%= t('phone_verify.confirm') %></button>
+      </form>
+      <form method="POST" action="/account/verify/phone/send" style="margin-top:6px;">
+        <button type="submit" class="btn btn-outline btn-sm"><%= t('phone_verify.send_new_code') %></button>
+      </form>
+    <% } else { %>
+      <form method="POST" action="/account/verify/phone/send">
+        <button type="submit" class="btn btn-outline btn-sm"><%= t('phone_verify.send_code') %></button>
+      </form>
+    <% } %>
+  </div>
+<% } %>

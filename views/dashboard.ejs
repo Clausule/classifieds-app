@@ -1,0 +1,97 @@
+<%- include('partials/header') %>
+
+<div class="container" style="padding-top:28px;">
+  <div class="page-head">
+    <h1><%= t('dashboard.title') %></h1>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <a href="/account/credits" class="btn btn-outline btn-sm">💳 <%= creditBalance %> <%= t(creditBalance === 1 ? 'common.credit_singular' : 'common.credit_plural') %></a>
+      <% if (listings.length > 0) { %>
+        <a href="/listings/new" class="btn btn-brand"><%= t('dashboard.new_listing') %></a>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (flash.created) { %><div class="alert alert-success"><%= t('dashboard.flash.created') %></div><% } %>
+  <% if (flash.updated) { %><div class="alert alert-success"><%= t('dashboard.flash.updated') %></div><% } %>
+  <% if (flash.deleted) { %><div class="alert alert-success"><%= t('dashboard.flash.deleted') %></div><% } %>
+
+  <% if (unreadCount > 0) { %>
+    <div class="alert" style="background:var(--gold-bg);color:var(--gold);">
+      <%= t(unreadCount > 1 ? 'dashboard.unread_messages' : 'dashboard.unread_message', { count: unreadCount }) %> <a href="/dashboard/messages"><%= t('dashboard.view_messages') %></a>
+    </div>
+  <% } %>
+
+  <% if (listings.length === 0) { %>
+    <div class="empty-state">
+      <p><%= t('dashboard.empty_state') %></p>
+      <a href="/listings/new" class="btn btn-brand"><%= t('dashboard.first_listing') %></a>
+    </div>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr><th><%= t('dashboard.col_name') %></th><th><%= t('dashboard.col_status') %></th><th><%= t('dashboard.col_premium') %></th><th></th></tr>
+      </thead>
+      <tbody>
+        <% listings.forEach(function(l) { %>
+          <tr>
+            <td><a href="/listings/<%= l.slug %>"><%= l.doll_name %></a></td>
+            <td><span class="badge badge-<%= l.status %>"><%= t('enum.listing_status.' + l.status) %></span></td>
+            <td>
+              <% if (l.is_premium_active) { %>
+                <span class="badge badge-premium"><%= t('dashboard.premium_until') %> <%= new Date(l.premium_until + 'Z').toLocaleDateString(locale === 'en' ? 'en-US' : 'nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }) %> <%= new Date(l.premium_until + 'Z').toLocaleTimeString(locale === 'en' ? 'en-US' : 'nl-NL', { hour: '2-digit', minute: '2-digit' }) %></span>
+                <span class="badge badge-premium countdown" data-until="<%= l.premium_until %>Z">--:--:--</span>
+              <% } %>
+              <% if (l.status === 'active') { %>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:4px;">
+                  <form action="/listings/<%= l.id %>/premium/checkout" method="POST">
+                    <button type="submit" class="btn btn-sm btn-outline">
+                      <%= l.is_premium_active ? t('dashboard.premium_extend') : t('dashboard.premium_become') %>
+                    </button>
+                  </form>
+                  <form action="/listings/<%= l.id %>/auto-renew" method="POST">
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:400;cursor:pointer;">
+                      <input type="checkbox" onchange="this.form.submit()" <%= l.auto_renew ? 'checked' : '' %> style="width:auto;">
+                      <%= t('dashboard.auto_renew') %>
+                    </label>
+                  </form>
+                </div>
+              <% } else if (!l.is_premium_active) { %>
+                <span style="color:var(--ink-soft);font-size:12px;">—</span>
+              <% } %>
+            </td>
+            <td style="text-align:right;white-space:nowrap;">
+              <a href="/listings/<%= l.id %>/edit" class="btn btn-outline btn-sm"><%= t('dashboard.edit') %></a>
+              <form action="/listings/<%= l.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm(<%- JSON.stringify(t('dashboard.delete_confirm')) %>)">
+                <button type="submit" class="btn btn-danger btn-sm"><%= t('dashboard.delete') %></button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<script>
+  (function () {
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    var tick = function () {
+      document.querySelectorAll('.countdown[data-until]').forEach(function (el) {
+        var diff = new Date(el.dataset.until).getTime() - Date.now();
+        if (diff <= 0) {
+          el.textContent = '00:00:00';
+          return;
+        }
+        var totalSeconds = Math.floor(diff / 1000);
+        var hours = Math.floor(totalSeconds / 3600);
+        var minutes = Math.floor((totalSeconds % 3600) / 60);
+        var seconds = totalSeconds % 60;
+        el.textContent = pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
+      });
+    };
+    tick();
+    setInterval(tick, 1000);
+  })();
+</script>
+
+<%- include('partials/footer') %>

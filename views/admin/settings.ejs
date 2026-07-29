@@ -1,0 +1,61 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="padding-top:28px;max-width:720px;">
+  <h1>Instellingen</h1>
+  <div class="admin-tabs">
+    <a href="/admin">Overzicht</a>
+    <a href="/admin/listings">Listings</a>
+    <a href="/admin/verificaties">Verificaties</a>
+    <a href="/admin/users">Gebruikers</a>
+    <a href="/admin/messages">Support inbox</a>
+    <a href="/admin/reports">Meldingen</a>
+    <a href="/admin/instellingen" class="active">Instellingen</a>
+  </div>
+
+  <% if (saved) { %><div class="alert alert-success">Opgeslagen.</div><% } %>
+  <% if (passwordSaved) { %><div class="alert alert-success">Wachtwoord gewijzigd.</div><% } %>
+  <% if (passwordError) { %><div class="alert alert-error"><%= passwordError %></div><% } %>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h3 style="margin-top:0;">Wachtwoord wijzigen</h3>
+    <form method="POST" action="/admin/instellingen/password">
+      <div class="form-row">
+        <label for="current_password">Huidig wachtwoord</label>
+        <input type="password" id="current_password" name="current_password" autocomplete="current-password" required>
+      </div>
+      <div class="form-row">
+        <label for="new_password">Nieuw wachtwoord</label>
+        <input type="password" id="new_password" name="new_password" autocomplete="new-password" required>
+        <p class="form-hint">Minimaal 8 tekens.</p>
+      </div>
+      <div class="form-row">
+        <label for="confirm_password">Bevestig nieuw wachtwoord</label>
+        <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Wachtwoord wijzigen</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">AI-omschrijving — prompt-template</h3>
+    <p class="form-hint">
+      Deze tekst wordt naar Gemini gestuurd zodra een adverteerder op "Genereer omschrijving" klikt bij het
+      plaatsen van een listing. Gebruik onderstaande merge-velden — die worden automatisch vervangen door de
+      waarden die op dat moment in het formulier staan:
+    </p>
+    <p class="form-hint mono" style="line-height:2;background:var(--panel);padding:10px 12px;border-radius:var(--radius);">
+      {{doll_name}} · {{age}} · {{length_cm}} · {{weight_kg}} · {{body_type}} · {{skin_tone}} · {{hair_color}} ·
+      {{origin_region}} · {{languages}} · {{price}} · {{location}} · {{neighborhood}} ·
+      {{first_impression}} · {{meeting_atmosphere}} · {{desired_impression}} · {{visitor_expectation}}
+    </p>
+    <form method="POST">
+      <div class="form-row">
+        <label for="prompt">Prompt</label>
+        <textarea id="prompt" name="prompt" rows="14" style="font-family:'IBM Plex Mono',monospace;font-size:13px;"><%= prompt %></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Opslaan</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

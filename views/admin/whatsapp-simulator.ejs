@@ -1,0 +1,34 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="padding-top:28px;max-width:680px;">
+  <a href="/admin/messages" style="font-size:13px;color:var(--ink-soft);">&larr; Terug naar support inbox</a>
+  <h1>WhatsApp-simulator</h1>
+  <p class="form-hint">
+    Testmodus (MESSAGING_PROVIDER=mock) &mdash; er is geen echt Twilio-account nodig.
+    Kies een adverteerder en stuur een bericht alsof het via WhatsApp binnenkwam.
+    Typ <strong>STOP</strong> om automatisch verlengen te stoppen, of <strong>VERLENG</strong> om 24u premium te verlengen.
+  </p>
+
+  <% if (profiles.length === 0) { %>
+    <div class="empty-state">Nog geen adverteerders met een telefoonnummer.</div>
+  <% } else { %>
+    <form method="POST" action="/admin/whatsapp-simulator" class="card">
+      <div class="form-row">
+        <label for="user_id">Adverteerder</label>
+        <select id="user_id" name="user_id" required>
+          <% profiles.forEach(function(p) { %>
+            <option value="<%= p.user_id %>"><%= p.name %> (<%= p.first_name %> <%= p.last_name %>) &mdash; <%= p.email %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="body">Bericht</label>
+        <textarea id="body" name="body" required placeholder="Typ een bericht of STOP / VERLENG..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Verstuur als inkomend WhatsApp-bericht</button>
+    </form>
+    <p class="form-hint">Het antwoord (of de reactie op een commando) verschijnt in het support-gesprek van deze adverteerder.</p>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

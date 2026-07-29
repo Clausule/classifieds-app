@@ -1,0 +1,22 @@
+<%- include('partials/header') %>
+
+<div class="container auth-shell">
+  <h1><%= t('auth.login2fa.title') %></h1>
+  <p class="form-hint"><%= t('auth.login2fa.hint') %></p>
+
+  <% if (mockCode) { %>
+    <div class="alert" style="background:var(--gold-bg);color:var(--gold);"><%= t('auth.login2fa.mock_code_prefix') %> <strong><%= mockCode %></strong></div>
+  <% } %>
+  <% if (error) { %><div class="alert alert-error"><%= t(error) %></div><% } %>
+
+  <form method="POST" action="/login/2fa" class="card">
+    <div class="form-row">
+      <label for="code"><%= t('auth.login2fa.code_label') %></label>
+      <input type="text" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" required autofocus>
+    </div>
+    <button type="submit" class="btn btn-brand btn-block"><%= t('auth.login2fa.submit') %></button>
+  </form>
+  <p style="margin-top:14px;font-size:14px;"><a href="/login"><%= t('auth.login2fa.back_link') %></a></p>
+</div>
+
+<%- include('partials/footer') %>

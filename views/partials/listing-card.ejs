@@ -1,0 +1,97 @@
+<article>
+  <a href="<%= listing.detailUrl %>" class="ticket price-tier-<%= listing.price %>" data-ga-id="<%= listing.id %>" data-ga-name="<%= listing.doll_name %>" data-ga-premium="<%= listing.is_premium_active ? '1' : '0' %>">
+    <% if (listing.is_premium_active) { %><span class="premium-flag"><%= t('listing_card.premium') %></span><% } %>
+    <figure class="ticket-media">
+      <% if (listing.thumbnail) { %>
+        <img src="/uploads/<%= listing.thumbnail %>" alt="<%= [listing.doll_name, listing.location].filter(Boolean).join(', ') %>">
+      <% } else { %>
+        <%= t('listing_card.no_photo') %>
+      <% } %>
+    </figure>
+    <div class="ticket-body">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <h2 class="ticket-title" style="margin:0;"><%= listing.doll_name %></h2>
+        <% if (listing.activityStatus) { %>
+          <span class="badge <%= listing.activityStatus === 'week' ? 'badge-week' : 'badge-active' %>"><%= t('listing_card.activity_' + listing.activityStatus) %></span>
+        <% } %>
+        <% if (listing.is_fictional) { %>
+          <span class="badge badge-demo"><%= t('listing_card.demo_badge') %></span>
+          <span class="info-tip tooltip-down">
+            <button type="button" class="info-icon" aria-label="<%= t('listing_card.demo_info_aria') %>">i</button>
+            <span class="tooltip-bubble" role="tooltip"><%= t('listing_card.demo_tooltip') %></span>
+          </span>
+        <% } %>
+      </div>
+      <% if (listing.age) { %>
+        <div class="ticket-location"><%= t('listing_card.age_label') %>: <%= listing.age %></div>
+      <% } %>
+      <% if (listing.location || listing.neighborhood) { %>
+        <div class="ticket-location"><%= t('listing_card.location_label') %>: <%= [listing.neighborhood, listing.location].filter(Boolean).join(', ') %></div>
+      <% } %>
+      <div class="ticket-price">
+        &euro;<%= listing.price != null ? Number(listing.price).toLocaleString('nl-NL') : '—' %>
+        <span class="ticket-price-unit"><%= t('listing_detail.per_vluggertje') %></span>
+      </div>
+    </div>
+  </a>
+</article>
+<script>
+  if (!window.__vluggertjeGaInit) {
+    window.__vluggertjeGaInit = true;
+    document.addEventListener('click', function (e) {
+      var card = e.target.closest('.ticket[data-ga-id]');
+      if (card && typeof gtag === 'function') {
+        gtag('event', 'select_listing', {
+          listing_id: card.dataset.gaId,
+          listing_name: card.dataset.gaName,
+          premium: card.dataset.gaPremium === '1'
+        });
+      }
+    });
+  }
+  if (!window.__vluggertjeTipInit) {
+    window.__vluggertjeTipInit = true;
+    // position:fixed (i.p.v. de CSS-default absolute) berekend vanuit de
+    // werkelijke viewport-positie van het icoontje — nodig omdat zowel .ticket
+    // als .listing-card overflow:hidden hebben (voor de afgeronde fotohoeken),
+    // wat een absoluut gepositioneerde tooltip afsnijdt zodra de kaart te kort
+    // is voor de volledige tooltip-hoogte. position:fixed ontsnapt aan die
+    // overflow-clipping, ongeacht kaartgrootte of scrollpositie.
+    function positionTooltip(tip) {
+      var icon = tip.querySelector('.info-icon');
+      var bubble = tip.querySelector('.tooltip-bubble');
+      var rect = icon.getBoundingClientRect();
+      var width = bubble.offsetWidth || 180;
+      var left = Math.max(8, Math.min(rect.left + rect.width / 2 - width / 2, window.innerWidth - width - 8));
+      bubble.style.position = 'fixed';
+      bubble.style.left = left + 'px';
+      bubble.style.transform = 'none';
+      if (tip.classList.contains('tooltip-down')) {
+        bubble.style.top = (rect.bottom + 8) + 'px';
+        bubble.style.bottom = 'auto';
+      } else {
+        bubble.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+        bubble.style.top = 'auto';
+      }
+    }
+    document.addEventListener('click', function (e) {
+      var icon = e.target.closest('.info-icon');
+      var openTip = document.querySelector('.info-tip.tooltip-open');
+      if (openTip && openTip !== (icon && icon.closest('.info-tip'))) {
+        openTip.classList.remove('tooltip-open');
+      }
+      if (icon) {
+        e.preventDefault();
+        var tip = icon.closest('.info-tip');
+        if (tip.classList.contains('tooltip-open')) {
+          tip.classList.remove('tooltip-open');
+        } else {
+          positionTooltip(tip);
+          tip.classList.add('tooltip-open');
+        }
+      } else if (openTip) {
+        openTip.classList.remove('tooltip-open');
+      }
+    });
+  }
+</script>

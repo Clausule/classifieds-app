@@ -1,0 +1,296 @@
+<%- include('partials/header') %>
+
+<div class="container" style="padding-top:28px;">
+  <nav aria-label="<%= t('listing_detail.breadcrumb_aria') %>" style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;">
+    <a href="<%= locale === 'en' ? '/en' : '/' %>" style="color:var(--ink-soft);"><%= t('listing_detail.breadcrumb_home') %></a>
+    <% if (cityUrl) { %> › <a href="<%= cityUrl %>" style="color:var(--ink-soft);"><%= listing.location %></a><% } %>
+    › <span aria-current="page"><%= listing.doll_name %></span>
+  </nav>
+  <a href="<%= locale === 'en' ? '/en' : '/' %>" id="back-link" style="font-size:13px;color:var(--ink-soft)">&larr; <%= t('listing_detail.back_to_overview') %></a>
+<script>
+  (function () {
+    var ref = document.referrer;
+    if (ref && ref.indexOf(window.location.origin) === 0) {
+      var link = document.getElementById('back-link');
+      link.href = ref;
+      if (ref.indexOf('/admin') !== -1) link.textContent = <%- JSON.stringify(t('listing_detail.back_to_admin')) %>;
+      else if (ref.indexOf('/dashboard') !== -1) link.textContent = <%- JSON.stringify(t('listing_detail.back_to_my_listings')) %>;
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        history.back();
+      });
+    }
+  })();
+</script>
+
+  <% if (flash.reported) { %>
+    <div class="alert alert-success" style="margin-top:16px;"><%= t('listing_detail.report_success') %></div>
+  <% } else if (flash.report_duplicate) { %>
+    <div class="alert" style="margin-top:16px;background:var(--gold-bg);color:var(--gold);"><%= t('listing_detail.report_duplicate') %></div>
+  <% } else if (flash.report_rate_limited) { %>
+    <div class="alert alert-error" style="margin-top:16px;"><%= t('listing_detail.report_rate_limited') %></div>
+  <% } else if (flash.report_error) { %>
+    <div class="alert alert-error" style="margin-top:16px;"><%= t('listing_detail.report_error') %></div>
+  <% } %>
+
+  <%
+    var isAdminViewer = typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'admin';
+    var isSellerViewer = typeof currentUser !== 'undefined' && currentUser && currentUser.id === listing.seller_id;
+    // Advertentienummer is alleen voor beheer — de adverteerder zelf mag dit
+    // nergens zien, ook niet op zijn eigen advertentie.
+    var showAdNumber = isAdminViewer;
+  %>
+
+  <div class="listing-card price-tier-<%= listing.price %>">
+    <div class="media-col">
+      <div class="hero-wrap">
+        <div class="ticket-media" id="main-image-wrap">
+          <% if (images.length) { %>
+            <img id="main-image" src="/uploads/<%= images[0].filename %>" alt="<%= [listing.doll_name, listing.location].filter(Boolean).join(', ') %>">
+          <% } else { %>
+            <%= t('listing_detail.no_photo') %>
+          <% } %>
+        </div>
+        <% if (showAdNumber) { %>
+          <span class="ad-number">#<%= String(listing.id).padStart(4, '0') %></span>
+        <% } %>
+        <% if (images.length > 1) { %>
+          <button type="button" class="hero-nav hero-nav-prev" aria-label="<%= t('listing_detail.hero_prev') %>">‹</button>
+          <button type="button" class="hero-nav hero-nav-next" aria-label="<%= t('listing_detail.hero_next') %>">›</button>
+        <% } %>
+      </div>
+      <% if (images.length > 1) { %>
+        <div class="thumb-row">
+          <% images.forEach(function(img, i) { %>
+            <img src="/uploads/<%= img.filename %>" class="thumb-select<%= i === 0 ? ' active' : '' %>" data-index="<%= i %>"
+                 alt="<%= listing.doll_name %> — foto <%= i + 1 %>">
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+    <% if (images.length > 1) { %>
+      <script>
+        (function () {
+          var images = <%- JSON.stringify(images.map(function (img) { return '/uploads/' + img.filename; })) %>;
+          var current = 0;
+          var mainImg = document.getElementById('main-image');
+          var thumbs = document.querySelectorAll('.thumb-select');
+          function show(index) {
+            current = (index + images.length) % images.length;
+            mainImg.src = images[current];
+            thumbs.forEach(function (t, i) { t.classList.toggle('active', i === current); });
+          }
+          thumbs.forEach(function (thumb, i) {
+            thumb.addEventListener('click', function () { show(i); });
+          });
+          document.querySelector('.hero-nav-prev').addEventListener('click', function () { show(current - 1); });
+          document.querySelector('.hero-nav-next').addEventListener('click', function () { show(current + 1); });
+        })();
+      </script>
+    <% } %>
+
+    <div class="listing-card-body">
+      <div class="name-row">
+        <h1 style="margin:0;"><%= listing.doll_name %></h1>
+        <% if (listing.activityStatus) { %>
+          <span class="badge <%= listing.activityStatus === 'week' ? 'badge-week' : 'badge-active' %>"><%= t('listing_card.activity_' + listing.activityStatus) %></span>
+        <% } %>
+        <% if (listing.is_fictional) { %>
+          <span class="badge badge-demo"><%= t('listing_card.demo_badge') %></span>
+          <span class="info-tip tooltip-down">
+            <button type="button" class="info-icon" aria-label="<%= t('listing_card.demo_info_aria') %>">i</button>
+            <span class="tooltip-bubble" role="tooltip"><%= t('listing_card.demo_tooltip') %></span>
+          </span>
+        <% } %>
+      </div>
+
+      <p class="bio"><%= listing.description %></p>
+
+      <div class="divider"></div>
+
+      <dl class="info-list">
+        <% [
+          [t('listing_detail.age'), listing.age ? listing.age : null],
+          [t('listing_detail.length'), listing.length_cm ? listing.length_cm + ' ' + t('listing_form.length_unit') : null],
+          [t('listing_detail.weight'), listing.weight_kg ? listing.weight_kg + ' ' + t('listing_form.weight_unit') : null],
+          [t('listing_detail.body_type'), listing.body_type ? t('enum.body_type.' + listing.body_type) : null],
+          [t('listing_detail.origin_region'), listing.origin_region ? t('enum.origin_region.' + listing.origin_region) : null],
+          [t('listing_detail.skin_tone'), listing.skin_tone ? t('enum.skin_tone.' + listing.skin_tone) : null],
+          [t('listing_detail.hair_color'), listing.hair_color ? t('enum.hair_color.' + listing.hair_color) : null],
+          [t('listing_detail.languages'), listing.languages ? listing.languages.split(',').map(function(l) { return t('enum.language.' + l.trim()); }).join(', ') : null],
+        ].forEach(function(row) { %>
+          <% if (row[1]) { %>
+            <div class="info-row">
+              <dt><%= row[0] %></dt>
+              <dd><%= row[1] %></dd>
+            </div>
+          <% } %>
+        <% }) %>
+      </dl>
+
+      <div class="divider"></div>
+
+      <div class="price-row">
+        <span class="price-main">
+          <span class="price-value">&euro;<%= listing.price != null ? Number(listing.price).toLocaleString(locale === 'en' ? 'en-US' : 'nl-NL') : '—' %></span>
+          <span class="price-unit"><%= t('listing_detail.per_vluggertje') %></span>
+          <span class="info-tip">
+            <button type="button" class="info-icon" data-ga-tip="vluggertje" aria-label="<%= t('listing_detail.vluggertje_info_aria') %>">i</button>
+            <span class="tooltip-bubble" role="tooltip"><%= t('listing_detail.vluggertje_tooltip') %></span>
+          </span>
+        </span>
+        <% if (identityVerified) { %><span class="badge badge-active"><%= t('listing_detail.verified_badge') %></span><% } %>
+        <% if (listing.is_premium_active) { %><span class="badge badge-premium"><%= t('listing_card.premium') %></span><% } %>
+      </div>
+      <script>
+        if (!window.__vluggertjeTipInit) {
+          window.__vluggertjeTipInit = true;
+          // position:fixed (i.p.v. de CSS-default absolute) berekend vanuit de
+          // werkelijke viewport-positie van het icoontje — nodig omdat zowel
+          // .ticket als .listing-card overflow:hidden hebben (voor de afgeronde
+          // fotohoeken), wat een absoluut gepositioneerde tooltip afsnijdt zodra
+          // de kaart te kort is voor de volledige tooltip-hoogte. position:fixed
+          // ontsnapt aan die overflow-clipping, ongeacht kaartgrootte of
+          // scrollpositie.
+          function positionTooltip(tip) {
+            var icon = tip.querySelector('.info-icon');
+            var bubble = tip.querySelector('.tooltip-bubble');
+            var rect = icon.getBoundingClientRect();
+            var width = bubble.offsetWidth || 180;
+            var left = Math.max(8, Math.min(rect.left + rect.width / 2 - width / 2, window.innerWidth - width - 8));
+            bubble.style.position = 'fixed';
+            bubble.style.left = left + 'px';
+            bubble.style.transform = 'none';
+            if (tip.classList.contains('tooltip-down')) {
+              bubble.style.top = (rect.bottom + 8) + 'px';
+              bubble.style.bottom = 'auto';
+            } else {
+              bubble.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+              bubble.style.top = 'auto';
+            }
+          }
+          document.addEventListener('click', function (e) {
+            var icon = e.target.closest('.info-icon');
+            var openTip = document.querySelector('.info-tip.tooltip-open');
+            if (openTip && openTip !== (icon && icon.closest('.info-tip'))) {
+              openTip.classList.remove('tooltip-open');
+            }
+            if (icon) {
+              e.preventDefault();
+              if (icon.dataset.gaTip && typeof gtag === 'function') {
+                gtag('event', 'vluggertje_tooltip_click', { listing_id: <%- JSON.stringify(listing.id) %> });
+              }
+              var tip = icon.closest('.info-tip');
+              if (tip.classList.contains('tooltip-open')) {
+                tip.classList.remove('tooltip-open');
+              } else {
+                positionTooltip(tip);
+                tip.classList.add('tooltip-open');
+              }
+            } else if (openTip) {
+              openTip.classList.remove('tooltip-open');
+            }
+          });
+        }
+      </script>
+
+      <% if (listing.location || listing.neighborhood) { %>
+        <div class="location-row">
+          📍 <%= t('listing_detail.location_label') %>: <%= [listing.neighborhood, listing.location].filter(Boolean).join(', ') %>
+        </div>
+        <img class="map-img" src="/listings/<%= listing.id %>/map.png" alt="<%= t('listing_detail.map_alt_prefix') %> <%= [listing.neighborhood, listing.location].filter(Boolean).join(', ') %>" loading="lazy">
+      <% } %>
+
+      <%
+        const phoneIcon = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.25 6.75c0 8.284 6.716 15 15 15h1.5a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>';
+      %>
+      <div class="cta-area">
+        <% if (isSellerViewer) { %>
+          <a href="/listings/<%= listing.id %>/edit" class="btn btn-outline btn-block" style="margin-top:14px;"><%= typeof editButtonLabel === 'string' && editButtonLabel ? editButtonLabel : t('listing_detail.edit') %></a>
+        <% } else if (sellerPhone) { %>
+          <button type="button" id="call-me-btn" class="btn btn-block cta-btn" style="margin-top:14px;"><%- phoneIcon %> <%= t('listing_detail.call_me') %></button>
+          <a href="tel:<%= sellerPhone %>" id="call-me-number" class="btn btn-block cta-btn" style="display:none;margin-top:14px;">
+            <%- phoneIcon %> <%= sellerPhoneDisplay %>
+          </a>
+          <script>
+            document.getElementById('call-me-btn').addEventListener('click', function () {
+              this.style.display = 'none';
+              document.getElementById('call-me-number').style.display = 'flex';
+              if (typeof gtag === 'function') {
+                gtag('event', 'show_phone_click', { listing_id: <%- JSON.stringify(listing.id) %>, demo: false });
+              }
+              fetch('/listings/<%= listing.id %>/call-click', { method: 'POST' });
+            });
+          </script>
+        <% } else if (listing.is_fictional) { %>
+          <button type="button" id="call-me-demo-btn" class="btn btn-block cta-btn" style="margin-top:14px;"><%- phoneIcon %> <%= t('listing_detail.call_me') %></button>
+          <p id="call-me-demo-text" class="form-hint" style="display:none;margin-top:14px;"><%= t('listing_detail.no_contact_hint') %></p>
+          <script>
+            document.getElementById('call-me-demo-btn').addEventListener('click', function () {
+              this.style.display = 'none';
+              document.getElementById('call-me-demo-text').style.display = 'block';
+              if (typeof gtag === 'function') {
+                gtag('event', 'show_phone_click', { listing_id: <%- JSON.stringify(listing.id) %>, demo: true });
+              }
+            });
+          </script>
+        <% } else { %>
+          <p class="form-hint" style="margin-top:14px;"><%= t('listing_detail.no_contact_hint') %></p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-row" style="margin-top:24px;">
+    <a href="#" id="report-link" style="font-size:12px;color:var(--ink-soft);"><%= t('listing_detail.report_link') %></a>
+    <form method="POST" action="/listings/<%= listing.id %>/report" id="report-form" class="card" style="display:none;margin-top:10px;max-width:420px;">
+      <h3 style="margin-top:0;"><%= t('listing_detail.report_title') %></h3>
+      <p class="form-hint"><%= t('listing_detail.report_intro') %></p>
+      <div class="form-row">
+        <label for="report_reason"><%= t('listing_detail.report_reason_label') %></label>
+        <select id="report_reason" name="reason" required>
+          <option value=""><%= t('listing_detail.report_choose') %></option>
+          <% ['illegal_content', 'safety_risk', 'fraud', 'inappropriate', 'other'].forEach(function(r) { %>
+            <option value="<%= r %>"><%= t('enum.report_reason.' + r) %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="report_description"><%= t('listing_detail.report_description_label') %></label>
+        <textarea id="report_description" name="description" required placeholder="<%= t('listing_detail.report_description_placeholder') %>"></textarea>
+      </div>
+      <div class="form-row">
+        <label for="report_email"><%= t('listing_detail.report_email_label') %></label>
+        <input type="email" id="report_email" name="reporter_email">
+        <p class="form-hint"><%= t('listing_detail.report_email_hint') %></p>
+      </div>
+      <div style="position:absolute;left:-9999px;" aria-hidden="true">
+        <label for="website">Website</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+      <input type="hidden" name="form_rendered_at" value="<%= Date.now() %>">
+      <div style="display:flex;gap:8px;">
+        <button type="submit" class="btn btn-danger btn-sm"><%= t('listing_detail.report_submit') %></button>
+        <button type="button" id="report-cancel" class="btn btn-outline btn-sm"><%= t('listing_detail.report_cancel') %></button>
+      </div>
+    </form>
+    <script>
+      (function () {
+        var link = document.getElementById('report-link');
+        var form = document.getElementById('report-form');
+        var cancel = document.getElementById('report-cancel');
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+          link.style.display = 'none';
+          form.style.display = 'block';
+        });
+        cancel.addEventListener('click', function () {
+          form.style.display = 'none';
+          link.style.display = 'inline';
+        });
+      })();
+    </script>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

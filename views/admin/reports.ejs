@@ -1,0 +1,62 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="padding-top:28px;">
+  <h1>Meldingen</h1>
+  <div class="admin-tabs">
+    <a href="/admin">Overzicht</a>
+    <a href="/admin/listings">Listings</a>
+    <a href="/admin/verificaties">Verificaties</a>
+    <a href="/admin/users">Gebruikers</a>
+    <a href="/admin/messages">Support inbox</a>
+    <a href="/admin/reports" class="active">Meldingen</a>
+    <a href="/admin/instellingen">Instellingen</a>
+  </div>
+
+  <% var reasonLabels = { illegal_content: 'Vermoedelijk illegale inhoud', safety_risk: 'Veiligheidsrisico', fraud: 'Nepadvertentie/fraude', inappropriate: 'Ongepaste inhoud', other: 'Anders' }; %>
+  <% var reportStatusLabels = { open: 'Open', dismissed: 'Afgewezen', resolved: 'Afgehandeld' }; %>
+  <% var listingStatusLabels = { pending: 'In behandeling', active: 'Actief', suspended: 'Geschorst', rejected: 'Afgewezen', expired: 'Verlopen', deleted: 'Verwijderd' }; %>
+  <div class="admin-tabs" style="border-bottom:none;margin-bottom:14px;">
+    <% ['open', 'dismissed', 'resolved'].forEach(function(s) { %>
+      <a href="/admin/reports?status=<%= s %>" class="<%= currentStatus === s ? 'active' : '' %>"><%= reportStatusLabels[s] %></a>
+    <% }) %>
+  </div>
+
+  <% if (reports.length === 0) { %>
+    <div class="empty-state">Geen meldingen in deze status.</div>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr><th>Advertentie</th><th>Status advertentie</th><th>Reden</th><th>Toelichting</th><th>Melder</th><th>Ontvangen</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% reports.forEach(function(r) { %>
+          <tr>
+            <td><% if (r.listing_slug) { %><a href="/listings/<%= r.listing_slug %>"><%= r.listing_title %></a><% } else { %><em>verwijderd</em><% } %></td>
+            <td><% if (r.listing_status) { %><span class="badge badge-<%= r.listing_status %>"><%= listingStatusLabels[r.listing_status] || r.listing_status %></span><% } %></td>
+            <td><%= reasonLabels[r.reason] || r.reason %></td>
+            <td style="max-width:280px;white-space:pre-line;"><%= r.description %></td>
+            <td><%= r.reporter_email || '—' %></td>
+            <td style="white-space:nowrap;"><%= new Date(r.created_at + 'Z').toLocaleString('nl-NL') %></td>
+            <td style="white-space:nowrap;">
+              <% if (currentStatus === 'open') { %>
+                <% if (r.listing_status !== 'suspended') { %>
+                  <form action="/admin/reports/<%= r.id %>/suspend" method="POST" style="display:inline">
+                    <button type="submit" class="btn btn-sm btn-danger">Direct offline halen</button>
+                  </form>
+                <% } %>
+                <form action="/admin/reports/<%= r.id %>/dismiss" method="POST" style="display:inline">
+                  <button type="submit" class="btn btn-sm btn-outline">Afwijzen</button>
+                </form>
+                <form action="/admin/reports/<%= r.id %>/resolve" method="POST" style="display:inline">
+                  <button type="submit" class="btn btn-sm btn-primary">Afhandelen</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

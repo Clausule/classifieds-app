@@ -1,0 +1,1328 @@
+/* ==========================================================================
+   Design tokens
+   ========================================================================== */
+:root {
+  --bg: #ffffff;
+  --panel: #f2f1ec;
+  --panel-2: #eae8e0;
+  --ink: #16181d;
+  --ink-soft: #55585f;
+  --border: #dedcd3;
+  --accent: #2853e3;
+  --accent-ink: #ffffff;
+  --brand: #0097be;
+  --brand-hover: #007a99;
+  --brand-soft: #00748f;
+  --brand-soft-bg: #dcf1f6;
+  --gold: #c8842a;
+  --gold-bg: #faedd6;
+  --green: #0f7a5c;
+  --green-bg: #e2f3ec;
+  --red: #b23b3b;
+  --red-bg: #fbe9e7;
+  --radius: 3px;
+  --shadow: 0 1px 2px rgba(22, 24, 29, 0.06), 0 6px 20px rgba(22, 24, 29, 0.05);
+}
+
+* { box-sizing: border-box; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5em;
+  color: var(--ink);
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.mono {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+button, input, select, textarea { font-family: inherit; font-size: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ==========================================================================
+   Lanceringsbalk — overgenomen van de oude site, staat los boven de header.
+   Puur CSS aan/uit-schakelen via checkbox-hack, geen JS nodig.
+   ========================================================================== */
+.notice-checkbox {
+  display: none;
+}
+
+.launch-notice {
+  background: #ffcc00;
+  color: #57585a;
+  text-align: center;
+  padding: 10px 45px;
+  position: relative;
+  font-size: 15px;
+}
+
+.launch-notice p {
+  margin: 0;
+  line-height: 22px;
+  font-size: 15px;
+}
+
+.launch-notice strong {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.notice-close {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 22px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.notice-checkbox:checked + .launch-notice {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .launch-notice { padding: 10px 36px; font-size: 13px; }
+  .launch-notice p { font-size: 13px; line-height: 19px; }
+}
+
+/* ==========================================================================
+   Header / nav
+   ========================================================================== */
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+}
+.wordmark:hover { opacity: 0.85; }
+.wordmark svg { height: 22px; width: auto; display: block; }
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-left: auto;
+  font-size: 14px;
+}
+.nav-links a { color: var(--ink-soft); }
+.nav-links a:hover { color: var(--ink); text-decoration: none; }
+/* .nav-links a heeft hogere specificiteit dan .btn-primary/.btn-brand alleen,
+   dus zonder deze regel wint de zachtgrijze navkleur van het witte
+   knoptekst-contrast — nauwelijks leesbaar op de knopachtergrond. */
+.nav-links a.btn-primary,
+.nav-links a.btn-primary:hover,
+.nav-links a.btn-brand,
+.nav-links a.btn-brand:hover { color: var(--accent-ink); }
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 26px;
+  height: 18px;
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.nav-toggle span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--ink);
+  border-radius: 2px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+}
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { background: #1e40cf; text-decoration: none; }
+.btn-brand { background: var(--brand); color: var(--accent-ink); }
+.btn-brand:hover { background: var(--brand-hover); text-decoration: none; }
+.btn-outline { background: transparent; border-color: var(--border); color: var(--ink); }
+.btn-outline:hover { border-color: var(--ink); text-decoration: none; }
+.btn-danger { background: var(--red-bg); color: var(--red); }
+.btn-sm { padding: 6px 11px; font-size: 13px; }
+.btn-block { width: 100%; justify-content: center; }
+
+/* ==========================================================================
+   Leeftijdspoort — bewust géén header/footer-include: geen navigatie of
+   andere links dan de twee keuzes hieronder. Simpele tussenversie, wordt
+   meegenomen zodra het design op de rest van de site wordt aangepakt.
+   ========================================================================== */
+.age-gate {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  /* Zelfde stralen-idee als "optie 1" uit de kaart-test, maar zonder foto
+     eronder — dus gewoon vlakke stralen i.p.v. multiply over een tegel.
+     Lichte blauwtint i.p.v. het volle Quickie-blauw tegen kaal wit — twee
+     verwante tinten naast elkaar oogt rustiger/volwassener dan felle kleur
+     tegen wit. Middelpunt is het midden van de viewport. */
+  background: repeating-conic-gradient(
+    from 0deg,
+    #9ed4e6 0deg 10deg,
+    #e6f3f7 10deg 26deg
+  );
+}
+.age-gate-window {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-width: 420px;
+  width: 100%;
+  padding: 36px 32px;
+  text-align: center;
+}
+.age-gate-logo { height: 28px; margin-bottom: 32px; }
+.age-gate-logo svg { height: 100%; width: auto; display: block; margin: 0 auto; }
+.age-gate-notice { font-weight: 600; color: var(--ink); margin: 0 0 12px; }
+.age-gate-consent { color: var(--ink-soft); font-size: 14px; margin: 0; }
+.age-gate-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 28px; }
+.age-gate-actions form { display: contents; }
+
+/* ==========================================================================
+   Search / hero — the page's actual job, not a marketing banner
+   ========================================================================== */
+.search-bar {
+  background: rgba(0, 151, 190, 0.06);
+  border-bottom: 1px solid var(--border);
+  padding: 22px 0;
+}
+
+.search-form {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.field {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+.field input, .field select {
+  border: none;
+  width: 100%;
+  background: transparent;
+  outline: none;
+  color: var(--ink);
+}
+.field label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin-bottom: 2px;
+}
+
+/* "Gebruik mijn locatie" hoort bij het STAD-veld, maar staat er als losse
+   regel ónder — normale flow (niet absoluut gepositioneerd), zodat de ruimte
+   die de link inneemt altijd netjes wordt meegeteld en nooit overlapt met
+   wat erna komt (op mobiel bijvoorbeeld het STRAAL-veld, dat er in de
+   gestapelde layout vlak onder staat). Trade-off: het STAD-veld is hierdoor
+   iets hoger dan STRAAL zolang de link zichtbaar is (geen gekozen stad) —
+   bewust geaccepteerd voor de garantie dat niets overlapt. */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+.field-group .field {
+  flex: none;
+  min-width: 0;
+}
+.use-location-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.use-location-link:hover { color: var(--brand-hover); }
+.field-group .form-hint {
+  margin: 4px 0 0;
+}
+.field-group .form-hint:empty {
+  display: none;
+}
+
+/* Zoeken op naam/omschrijving is secundair — ingeklapt tot een rond icoon-
+   knopje, klapt open naar een tekstveld zodra het nodig is.
+   Voorlopig verborgen (niet verwijderd) — verwijder onderstaande regel om
+   de zoekfunctie weer te tonen. */
+.search-field {
+  display: none;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  flex: 0 0 auto;
+}
+.search-toggle {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.search-toggle:hover { color: var(--ink); border-color: var(--ink-soft); }
+.search-field input#q {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  margin-left: 0;
+  border: none;
+  background: transparent;
+  opacity: 0;
+  transition: width 0.18s ease, opacity 0.18s ease, margin-left 0.18s ease, padding 0.18s ease;
+}
+.search-field.expanded input#q {
+  width: 220px;
+  opacity: 1;
+  margin-left: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+/* Prijsfilter: vier gekleurde "bordjes" (zelfde kleuren als de prijs-tiers op
+   de listing-kaarten) i.p.v. een tekstlabel — puur grafisch, aan/uit per klik. */
+.price-plates {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 0 4px;
+  /* .search-form gebruikt align-items: flex-start, en de STAD/STRAAL-velden
+     zijn door hun label boven de input hoger dan de bordjes — zonder deze
+     margin staan de bordjes daardoor net iets boven het midden van die
+     velden i.p.v. verticaal gecentreerd ertegenover. */
+  margin-top: 4px;
+}
+.plate {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+/* Vlak, modern muntje: effen tint-achtergrond met een dunne gekleurde rand
+   in de tier-kleur (zelfde randlogica als de listing-kaarten), i.p.v. het
+   eerdere gegraveerde 3D-muntje-effect. */
+.plate[class*="price-tier-"] {
+  background: var(--tier-tint);
+  box-shadow: inset 0 0 0 2px var(--tier-color);
+}
+.plate input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.plate-price {
+  color: var(--tier-color);
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  pointer-events: none;
+  position: relative;
+  z-index: 2;
+}
+.plate:hover { transform: translateY(-2px); }
+.price-plates.has-selection .plate { opacity: 0.35; }
+.price-plates.has-selection .plate.selected {
+  opacity: 1;
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 2px var(--tier-color), 0 0 0 2px var(--bg), 0 0 0 4px var(--tier-color);
+}
+
+/* ==========================================================================
+   Listing grid + ticket-style cards (signature element)
+   ========================================================================== */
+/* Mobiel: hint (indien aanwezig) op een eigen regel bovenaan, daaronder
+   "wis filters" + de raster/lijst-toggle op dezelfde regel (die toggle valt
+   op smalle schermen toch al bijna buiten beeld, dus blijft bewust samen met
+   "wis filters"). Vanaf 761px (zelfde breakpoint als de rest van de site)
+   staat alles op één regel: reset links, toggle rechts, hint netjes ertussen. */
+.view-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 28px 0 -18px;
+}
+.view-toggle-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  order: 0;
+}
+.view-toggle-reset {
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-decoration: underline;
+}
+.view-toggle-reset:hover { color: var(--ink); }
+.view-toggle-hint {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0;
+  order: 1;
+}
+@media (min-width: 761px) {
+  .view-toggle {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .view-toggle-bottom { display: contents; }
+  .view-toggle-reset { order: -1; }
+  .view-toggle-hint { order: 0; flex: 1; text-align: center; }
+  .view-toggle-group { order: 1; }
+}
+.view-toggle-group {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.view-toggle-group button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: none;
+  background: var(--bg);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.view-toggle-group button + button { border-left: 1px solid var(--border); }
+.view-toggle-group button.active { background: var(--brand); color: #fff; }
+
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+  margin: 28px 0;
+}
+/* De <article> om elke kaart is puur semantisch (SEO/toegankelijkheid) —
+   layout-technisch onzichtbaar, zodat .ticket zelf het grid-item blijft
+   (nodig voor het stretch-gedrag waarmee de prijs onderaan blijft staan). */
+.listing-grid > article { display: contents; }
+
+/* Lijstweergave: zelfde .ticket-kaarten, alleen herschikt (foto links, tekst
+   rechts) i.p.v. nieuwe markup — de toggle wisselt puur deze class om.
+   Mobiel altijd 1 kolom (het punt is juist snel verticaal scannen); vanaf
+   761px (zelfde breakpoint als de rest van de site) 2 naast elkaar. */
+.listing-grid.view-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+@media (min-width: 761px) {
+  .listing-grid.view-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+.listing-grid.view-list .ticket { flex-direction: row; }
+.listing-grid.view-list .ticket-media { width: 96px; flex-shrink: 0; }
+.listing-grid.view-list .ticket-body { padding: 8px 12px; justify-content: center; }
+.listing-grid.view-list .ticket-title { -webkit-line-clamp: 1; }
+
+.ticket {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  position: relative;
+}
+.ticket:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+/* Elke transform op een voorouder maakt 'm het containing block voor
+   position:fixed-nakomelingen (i.p.v. de viewport) — de tooltip-bubble wordt
+   dan verkeerd gepositioneerd t.o.v. de JS-berekende viewport-coördinaten
+   zodra de kaart gehoverd wordt (wat bijna altijd het geval is vlak voor een
+   klik op het info-icoontje). Transform hier uitzetten zodra er een open
+   tooltip in de kaart zit, zodat position:fixed weer gewoon viewport-relatief
+   werkt. */
+.ticket:has(.tooltip-open) {
+  transform: none;
+}
+
+/* Prijs-kleurenlegenda: volledige gekleurde rand + tint + gekleurde prijs,
+   op zowel de listing-kaarten (.ticket) als de hele advertentiepagina
+   (.listing-card) — bewust dezelfde --tier-color/--tier-tint overal, zodat
+   de detailpagina niet los oogt van de kaart waar de bezoeker vandaan komt. */
+.price-tier-50 { --tier-color: #0097BE; --tier-tint: rgba(0, 151, 190, 0.08); }
+.price-tier-60 { --tier-color: #2ca02c; --tier-tint: rgba(44, 160, 44, 0.08); }
+.price-tier-70 { --tier-color: #ccaa00; --tier-tint: rgba(204, 170, 0, 0.08); }
+.price-tier-80 { --tier-color: #e00515; --tier-tint: rgba(224, 5, 21, 0.08); }
+
+.ticket[class*="price-tier-"] {
+  border: 3px solid var(--tier-color);
+  background: var(--tier-tint);
+}
+.listing-card[class*="price-tier-"] {
+  border: 3px solid var(--tier-color);
+  background: var(--tier-tint);
+}
+[class*="price-tier-"] .ticket-price {
+  color: var(--tier-color);
+}
+
+/* ==========================================================================
+   Listingdetailpagina — mobile-first: één doorlopende, prijskleur-omrande
+   kaart (foto t/m bel-knop), i.p.v. een neutrale foto naast een los gekleurd
+   prijsvakje. Vanaf 761px (zelfde breakpoint als de rest van de site, zie
+   @media (max-width: 760px) hieronder) wordt dezelfde kaart een tweekoloms
+   grid — nog steeds ÉÉN vlak met de prijskleur eromheen, alleen intern anders
+   ingedeeld, in plaats van weer twee losse dozen zoals voor de mobile-first
+   herbouw.
+   ========================================================================== */
+.listing-card {
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.hero-wrap { position: relative; background: var(--bg); }
+
+.ad-number {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #fff;
+  background: rgba(22, 24, 29, 0.55);
+  padding: 3px 8px;
+  border-radius: 999px;
+  z-index: 2;
+}
+
+.hero-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(22, 24, 29, 0.45);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+.hero-nav:hover { background: rgba(22, 24, 29, 0.65); }
+.hero-nav-prev { left: 10px; }
+.hero-nav-next { right: 10px; }
+
+.thumb-row {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--bg);
+  overflow-x: auto;
+}
+.thumb-select {
+  width: 52px;
+  height: 65px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 2px solid transparent;
+  opacity: 0.7;
+  cursor: pointer;
+}
+.thumb-select.active { border-color: var(--tier-color); opacity: 1; }
+
+.listing-card-body { padding: 16px; }
+
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.name-row h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 22px;
+}
+
+.bio {
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin: 0 0 16px;
+  white-space: pre-line;
+}
+
+.listing-card .divider { height: 1px; background: var(--border); margin: 0 0 14px; }
+
+.info-list { margin: 0 0 16px; }
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+  border-bottom: 1px dashed var(--border);
+}
+.info-row:last-child { border-bottom: none; }
+.info-row dt { color: var(--ink-soft); font-weight: 400; margin: 0; }
+.info-row dd { margin: 0; font-weight: 600; text-align: right; }
+
+.price-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin: 4px 0 14px;
+}
+.price-main {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.price-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  font-size: 30px;
+  color: var(--tier-color);
+}
+.price-unit {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.info-tip { position: relative; display: inline-flex; }
+.info-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--ink-soft);
+  color: var(--ink-soft);
+  background: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.info-icon:hover, .info-icon:focus-visible { border-color: var(--ink); color: var(--ink); }
+.tooltip-bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px;
+  background: var(--ink);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  line-height: 1.4;
+  padding: 8px 10px;
+  border-radius: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.12s ease;
+  z-index: 5;
+  pointer-events: none;
+}
+.tooltip-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+}
+/* Bewust alleen bij klik/tik tonen, niet bij hover — een losse CSS-hover-regel
+   toonde de tooltip onafhankelijk van de click-toggle-logica, wat samen met de
+   position:fixed-berekening een race gaf (kort zichtbare, verkeerd
+   gepositioneerde flits). Toetsenbordgebruikers komen alsnog uit de voeten:
+   een <button> activeert al native op Enter/Spatie met een 'click'-event, dat
+   dezelfde toggle-logica hieronder aanroept. */
+.info-tip.tooltip-open .tooltip-bubble {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Naast de naam zit de badge vaak vlak boven de rand van .listing-card (die
+   overflow:hidden heeft) — daar zou de standaard omhoog-openende tooltip
+   worden afgesneden. .tooltip-down laat 'm in plaats daarvan naar beneden
+   openen, waar altijd nog bio/kenmerken onder zitten. */
+.info-tip.tooltip-down .tooltip-bubble {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+.info-tip.tooltip-down .tooltip-bubble::after {
+  top: auto;
+  bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: var(--ink);
+}
+
+.location-row {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.map-img {
+  width: 100%;
+  border-radius: 6px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.cta-btn { background: var(--tier-color); color: #fff; border-color: var(--tier-color); }
+.cta-btn:hover { filter: brightness(0.92); text-decoration: none; }
+
+@media (min-width: 761px) {
+  .listing-card {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    grid-template-areas: "media body";
+    /* align-items:start (i.p.v. de grid-default "stretch") is de kern van de
+       fix: zonder dit rekt de kortere kolom (foto+thumbnails) zich uit tot de
+       hoogte van de langere tekstkolom, met een lege witte plek onder de
+       thumbnails tot gevolg. Nu blijft elke kolom gewoon zo hoog als zijn
+       eigen inhoud, en toont de resterende ruimte gewoon de tint van de kaart. */
+    align-items: start;
+    gap: 0 20px;
+    max-width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .media-col { grid-area: media; }
+  .listing-card-body {
+    grid-area: body;
+    padding: 24px 28px 24px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  /* Bel-knop/edit-link/login-hint helemaal onderaan de rechterkolom, ook als
+     de linkerkolom (staande foto) hoger uitvalt dan de tekstinhoud. Vaste
+     wrapper i.p.v. :last-child, want de bel-knop-tak eindigt met een <script>
+     dat als DOM-element wél :last-child zou zijn maar geen render-box heeft
+     (margin-top:auto zou dan geen effect hebben). */
+  .cta-area { margin-top: auto; }
+
+  /* Zelfde breedte/centrering als .listing-card hierboven (980px, auto-marge)
+     — anders blijft deze regel links uitgelijnd met .container (1180px) i.p.v.
+     met de kaart erboven, en oogt "Advertentie melden" scheef t.o.v. de rand. */
+  .report-row { max-width: 980px; margin-left: auto; margin-right: auto; }
+}
+
+.ticket-media {
+  margin: 0;
+  /* Staand i.p.v. liggend — de meeste echte listingfoto's zijn staande
+     telefoonfoto's; een liggend vak sneed die extreem bij (zie geheugennotitie
+     over de portret-crop-gap). Fictieve/liggende foto's leveren nu een iets
+     krappere zij-crop in plaats van andersom een verminkte staande foto. */
+  aspect-ratio: 4 / 5;
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 12px;
+  overflow: hidden;
+}
+.ticket-media img { width: 100%; height: 100%; object-fit: cover; }
+
+.ticket-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.ticket-title {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.ticket-price {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+  margin-top: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.ticket-price-unit {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.ticket-location {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.badge-premium { background: var(--gold-bg); color: var(--gold); }
+.badge-active { background: var(--green-bg); color: var(--green); }
+.badge-week { background: var(--gold-bg); color: var(--gold); }
+.badge-pending { background: var(--panel-2); color: var(--ink-soft); }
+.badge-demo { background: var(--panel-2); color: var(--ink-soft); }
+.badge-rejected { background: var(--red-bg); color: var(--red); }
+.badge-suspended { background: var(--red-bg); color: var(--red); }
+.badge-expired { background: var(--panel-2); color: var(--ink-soft); }
+.badge-deleted { background: var(--panel-2); color: var(--ink-soft); }
+
+.premium-flag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--gold-bg);
+  color: var(--gold);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  z-index: 2;
+}
+
+/* ==========================================================================
+   Generic layout bits
+   ========================================================================== */
+.page-head {
+  padding: 28px 0 8px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.result-count { color: var(--ink-soft); font-size: 13px; }
+
+/* Statische informatie-/beleidspagina's (privacybeleid, verificatiebeleid,
+   enz.) — leesbare regellengte, geen los .page-head nodig, één h1 per pagina. */
+.content-page {
+  max-width: 720px;
+  padding-top: 32px;
+  padding-bottom: 48px;
+}
+.content-page h1 { margin-bottom: 20px; }
+.content-page h2 { margin-top: 32px; }
+.content-page p { margin: 0 0 14px; }
+.content-page ul { margin: 0 0 14px; padding-left: 22px; }
+.content-page li { margin-bottom: 6px; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+
+.form-steps-indicator { margin-bottom: 16px; }
+.form-steps-bar {
+  height: 6px;
+  background: var(--panel-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.form-steps-fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+
+.form-row { margin-bottom: 16px; }
+.form-row label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.form-row input,
+.form-row select,
+.form-row textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  color: var(--ink);
+  background: var(--bg);
+}
+.form-row textarea { resize: vertical; min-height: 120px; }
+.form-row input[type="checkbox"],
+.form-row input[type="radio"] {
+  width: auto;
+  border: none;
+  padding: 0;
+  background: none;
+}
+.form-hint { font-size: 12px; color: var(--ink-soft); margin: 4px 0 0; }
+
+.suggestions-list {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+.suggestions-list button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--ink);
+}
+.suggestions-list button:hover,
+.suggestions-list button.active {
+  background: var(--panel-2);
+}
+
+.alert {
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.alert-error { background: var(--red-bg); color: var(--red); }
+.alert-success { background: var(--green-bg); color: var(--green); }
+
+table.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+table.admin-table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 10px;
+}
+table.admin-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 10px;
+  vertical-align: middle;
+}
+table.admin-table tr:hover td { background: var(--panel); }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin: 20px 0 32px;
+}
+.stat {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.stat .num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+}
+.stat .label { font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.admin-tabs a {
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.admin-tabs a.active { color: var(--ink); border-bottom-color: var(--accent); }
+.admin-tabs a:hover { text-decoration: none; color: var(--ink); }
+
+.message-thread { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+.msg {
+  max-width: 70%;
+  padding: 10px 13px;
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+.msg-user { background: var(--panel); align-self: flex-start; }
+.msg-admin { background: var(--brand-soft-bg); color: var(--brand-soft); align-self: flex-end; }
+.msg-meta { font-size: 11px; opacity: 0.65; margin-top: 4px; }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ink-soft);
+}
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+  background: rgba(0, 151, 190, 0.06);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 40px 24px 28px;
+}
+.footer-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px 56px;
+}
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 140px;
+}
+.footer-col-title {
+  margin: 0 0 3px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+}
+.footer-col a { color: var(--ink-soft); }
+.footer-col a:hover { color: var(--ink); }
+
+/* Zelfde Q-vorm als de favicon, hier los van zijn blauwe achtergrondvlak en
+   gedempt van kleur — een rustig merkteken, geen tweede logo. */
+.footer-mark { color: rgba(0, 151, 190, 0.22); flex-shrink: 0; align-self: flex-end; }
+.footer-mark svg { height: 72px; width: auto; display: block; }
+
+.footer-bottom {
+  border-top: 1px solid var(--border);
+}
+.footer-meta {
+  padding: 16px 24px;
+}
+
+.pagination { display: flex; gap: 8px; justify-content: center; margin: 30px 0; }
+.pagination a, .pagination span {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.pagination a:hover { color: var(--ink); }
+.pagination .current { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+.auth-shell {
+  max-width: 420px;
+  margin: 60px auto;
+}
+
+.phone-field-group {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 12px;
+}
+
+/* ==========================================================================
+   Legacy SEO-content (overgezet vanaf de oude homepage) — bewust stil en
+   klein gehouden, staat onderaan de pagina onder de listing-grid.
+   ========================================================================== */
+/* Eén bron voor font-size/kleur voor dit hele blok — nav, main en alles
+   daarbinnen (headings incluis, via "inherit" hieronder) leidt zijn grootte
+   hiervan af, in plaats van los-van-elkaar onderhouden getallen per blokje. */
+.seo-wrapper {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+/* De rand/opening-spacing hoort maar bij één element — header (met de nav
+   erin) is het eerste zichtbare ding in dit blok (altijd zichtbaar, main
+   erna bevat alleen nog de collapsible <details>), dus die draagt de "twee
+   lijnen"-rand. */
+.seo-wrapper > header {
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+  padding: 8px 0 0;
+}
+.seo-wrapper a { color: var(--ink-soft); text-decoration: underline; text-decoration-color: var(--border); }
+.seo-wrapper a:hover { color: var(--ink); }
+.seo-wrapper p { margin: 0 0 12px; }
+
+/* Headings erven font-size/kleur i.p.v. een eigen getal — moet vóór de
+   context-specifieke regels hieronder staan: gelijke specificity, dus wint
+   de regel die later in dit bestand staat (leverde eerder al eens per
+   ongeluk een verkeerde margin-top op toen de volgorde omgedraaid was). */
+.seo-wrapper h1, .seo-wrapper h2, .seo-wrapper h3, .seo-wrapper h4 { font-size: inherit; color: inherit; }
+
+.seo-details > summary { cursor: pointer; }
+.seo-details > summary h1 { display: inline; margin: 0; font-family: 'Inter', sans-serif; font-weight: 400; }
+.seo-details > summary:hover h1 { color: var(--ink); }
+.seo-details > p { font-weight: 500; margin: 6px 0 14px; }
+.seo-details > article h2 { margin: 0 0 6px; }
+.seo-wrapper h3 { margin: 14px 0 6px; }
+
+/* Gedeeld patroon: een h4-label naast een rij items die op smallere
+   schermen terugvalt op meerdere regels (gebruikt door Handige links en
+   elke stedengroep). */
+.seo-inline-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; }
+.seo-inline-row h4 { margin: 0; white-space: nowrap; }
+
+.seo-asides { display: flex; flex-direction: column; gap: 14px; margin: 14px 0; }
+.seo-asides h3 { margin: 0 0 6px; }
+.seo-asides aside p:last-child { margin-bottom: 0; }
+
+/* De nav-titel is een <p>, geen heading — erft dezelfde grootte, bewust
+   vetgedrukt om als label te lezen. */
+.seo-related-links { margin: 0 0 14px; }
+.seo-related-links p { font-weight: 400; margin: 0; }
+.seo-related-links a { display: inline-block; }
+
+.seo-external-links { margin: 14px 0; }
+.seo-external-links a { display: inline-block; }
+
+.seo-faq details {
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+}
+.seo-faq summary {
+  cursor: pointer;
+  font-weight: 400;
+}
+.seo-faq summary:hover { color: var(--ink); }
+.seo-faq details p { margin: 8px 0 0; }
+
+.seo-cities { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
+.seo-cities ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: row; flex-wrap: wrap; gap: 6px 18px; }
+.seo-cities li { white-space: nowrap; }
+
+.seo-wrapper + .site-footer { margin-top: 8px; }
+
+.seo-tagline {
+  font-style: italic;
+  margin: 0;
+  border: none;
+  padding: 0;
+}
+.seo-details > .seo-tagline { margin-top: 14px; }
+
+@media (max-width: 760px) {
+  .field { flex-basis: 100%; }
+  .search-field.expanded input#q { width: 100%; }
+  .nav-toggle { display: flex; }
+  .nav-row { position: relative; }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .nav-links.open { display: flex; }
+  .phone-field-group { grid-template-columns: 1fr; }
+  table.admin-table { display: block; overflow-x: auto; white-space: nowrap; }
+  .admin-tabs { overflow-x: auto; flex-wrap: nowrap; }
+  .admin-tabs a { white-space: nowrap; }
+}
+
+/* ==========================================================================
+   404-pagina — uitgeknipte hond op dezelfde stralen-achtergrond als de
+   leeftijdspoort, zodat de foto niet los op de pagina lijkt te staan.
+   ========================================================================== */
+.not-found {
+  text-align: center;
+  padding: 50px 24px 70px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.not-found-stage {
+  width: 320px;
+  height: 320px;
+  margin: 0 auto 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: repeating-conic-gradient(from 0deg, #9ed4e6 0deg 10deg, #e6f3f7 10deg 26deg);
+}
+.not-found-dog {
+  width: 84%;
+  height: auto;
+  filter: saturate(0.85) contrast(1.03) drop-shadow(0 10px 14px rgba(22, 24, 29, 0.28));
+}
+.not-found h1 { margin: 0 0 10px; }
+.not-found p { color: var(--ink-soft); margin: 0 0 24px; }

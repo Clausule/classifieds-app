@@ -1,0 +1,65 @@
+<div class="view-toggle">
+  <% if (typeof nearHint !== 'undefined' && nearHint) { %>
+    <p class="view-toggle-hint"><%= nearHint %></p>
+  <% } %>
+  <div class="view-toggle-bottom">
+    <% if (typeof showReset !== 'undefined' && showReset) { %>
+      <a href="<%= locale === 'en' ? '/en' : '/' %>" class="view-toggle-reset"><%= t('index.clear_filters') %></a>
+    <% } else { %>
+      <span></span>
+    <% } %>
+    <div class="view-toggle-group">
+      <button type="button" id="view-toggle-grid" aria-pressed="true" aria-label="<%= t('index.view_grid') %>">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
+        <%= t('index.view_grid') %>
+      </button>
+      <button type="button" id="view-toggle-list" aria-pressed="false" aria-label="<%= t('index.view_list') %>">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="6" height="6" rx="1"/><line x1="11" y1="7" x2="21" y2="7"/><rect x="3" y="14" width="6" height="6" rx="1"/><line x1="11" y1="17" x2="21" y2="17"/></svg>
+        <%= t('index.view_list') %>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Gedeeld door homepage + stadsoverzicht (beide includen deze partial vóór
+  // hun #listing-grid) — de class-wissel is puur CSS (zie .listing-grid.view-list
+  // in style.css), listing-card.ejs zelf hoeft niet te weten in welke weergave
+  // hij staat. Op DOMContentLoaded ipv direct: dit script-blok staat vóór
+  // #listing-grid in de bron, dus die bestaat nog niet als dit inline zou draaien.
+  document.addEventListener('DOMContentLoaded', function () {
+    var grid = document.getElementById('listing-grid');
+    var gridBtn = document.getElementById('view-toggle-grid');
+    var listBtn = document.getElementById('view-toggle-list');
+    if (!grid || !gridBtn || !listBtn) return;
+
+    var STORAGE_KEY = 'quickie_view_mode';
+
+    function applyMode(mode) {
+      var isList = mode === 'list';
+      grid.classList.toggle('view-list', isList);
+      gridBtn.classList.toggle('active', !isList);
+      listBtn.classList.toggle('active', isList);
+      gridBtn.setAttribute('aria-pressed', String(!isList));
+      listBtn.setAttribute('aria-pressed', String(isList));
+    }
+
+    function setMode(mode) {
+      applyMode(mode);
+      try { localStorage.setItem(STORAGE_KEY, mode); } catch (e) {}
+    }
+
+    gridBtn.addEventListener('click', function () {
+      setMode('grid');
+      if (typeof gtag === 'function') gtag('event', 'view_toggle', { view_mode: 'grid' });
+    });
+    listBtn.addEventListener('click', function () {
+      setMode('list');
+      if (typeof gtag === 'function') gtag('event', 'view_toggle', { view_mode: 'list' });
+    });
+
+    var saved = null;
+    try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+    applyMode(saved === 'list' ? 'list' : 'grid');
+  });
+</script>

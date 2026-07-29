@@ -1,0 +1,58 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="padding-top:28px;max-width:720px;">
+  <a href="/admin/verificaties" style="font-size:13px;color:var(--ink-soft)">&larr; Terug naar verificaties</a>
+  <h1 style="margin-top:8px;"><%= profile.first_name %> <%= profile.last_name %></h1>
+  <% var profileStatusLabels = { approved: 'goedgekeurd', rejected: 'afgewezen' }; %>
+  <span class="badge badge-<%= profile.status === 'approved' ? 'active' : profile.status %>"><%= profileStatusLabels[profile.status] || profile.status %></span>
+  <% if (profile.status === 'rejected' && profile.rejection_reason) { %>
+    <p class="form-hint">Reden: <%= profile.rejection_reason %></p>
+  <% } %>
+
+  <div class="card" style="margin-top:16px;">
+    <table style="width:100%;font-size:14px;">
+      <tr>
+        <td style="color:var(--ink-soft);padding:5px 0;width:40%;">Account e-mail</td>
+        <td><%= profile.email %> <span class="badge badge-<%= profile.email_verified_at ? 'active' : 'pending' %>"><%= profile.email_verified_at ? 'geverifieerd' : 'niet geverifieerd' %></span></td>
+      </tr>
+      <tr><td style="color:var(--ink-soft);padding:5px 0;">Type ID-bewijs</td><td style="text-transform:capitalize;"><%= profile.id_document_type %></td></tr>
+      <tr><td style="color:var(--ink-soft);padding:5px 0;">Documentnummer</td><td><%= profile.id_document_number %></td></tr>
+      <tr>
+        <td style="color:var(--ink-soft);padding:5px 0;">Telefoonnummer</td>
+        <td>
+          +<%= profile.phone_code %> <%= profile.phone_number %>
+          <span class="badge badge-<%= profile.phone_verified_at ? 'active' : 'pending' %>"><%= profile.phone_verified_at ? 'geverifieerd' : 'niet geverifieerd' %></span>
+        </td>
+      </tr>
+    </table>
+
+    <h3>Identiteitsbewijs</h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <img src="/account/verify/document/<%= profile.id %>/front" style="max-width:300px;border-radius:var(--radius);border:1px solid var(--border);">
+      <% if (profile.id_document_back) { %>
+        <img src="/account/verify/document/<%= profile.id %>/back" style="max-width:300px;border-radius:var(--radius);border:1px solid var(--border);">
+      <% } %>
+    </div>
+
+    <h3>Selfie (voor identiteitscontrole)</h3>
+    <% if (profile.selfie_photo) { %>
+      <img src="/account/verify/document/<%= profile.id %>/selfie" style="max-width:300px;border-radius:var(--radius);border:1px solid var(--border);">
+    <% } else { %>
+      <p class="form-hint">Geen selfie geregistreerd.</p>
+    <% } %>
+
+    <% if (profile.status !== 'approved') { %>
+      <form action="/admin/verificaties/<%= profile.id %>/status" method="POST" style="margin-top:16px;">
+        <input type="hidden" name="status" value="approved">
+        <button type="submit" class="btn btn-primary">Goedkeuren</button>
+      </form>
+    <% } %>
+    <form action="/admin/verificaties/<%= profile.id %>/status" method="POST" style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+      <input type="hidden" name="status" value="rejected">
+      <input type="text" name="reason" placeholder="Reden voor afwijzen" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;">
+      <button type="submit" class="btn btn-danger">Afwijzen</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

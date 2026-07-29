@@ -1,0 +1,31 @@
+<%- include('partials/header') %>
+
+<%
+  function slugify(s) {
+    return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+%>
+<div class="container content-page">
+  <h1><%= t(page.metaTitleKey) %></h1>
+  <% page.blocks.forEach(function(block) { %>
+    <% if (block.type === 'h2') { %>
+      <h2 id="<%= slugify(t(block.textKey)) %>"><%= t(block.textKey) %></h2>
+    <% } else if (block.type === 'p') { %>
+      <p><%= t(block.textKey) %></p>
+    <% } else if (block.type === 'ul') { %>
+      <ul>
+        <% block.itemKeys.forEach(function(key) { %><li><%= t(key) %></li><% }) %>
+      </ul>
+    <% } else if (block.type === 'ul-links') { %>
+      <ul>
+        <% block.items.forEach(function(item) { %><li><a href="<%= locale === 'en' ? '/en' : '' %><%= item.href %>"><%= t(item.labelKey) %></a></li><% }) %>
+      </ul>
+    <% } else if (block.type === 'lines') { %>
+      <p class="lines">
+        <% block.itemKeys.forEach(function(key, i) { %><%= t(key) %><% if (i < block.itemKeys.length - 1) { %><br><% } %><% }) %>
+      </p>
+    <% } %>
+  <% }) %>
+</div>
+
+<%- include('partials/footer') %>

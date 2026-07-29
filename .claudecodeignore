@@ -1,0 +1,37 @@
+# ====================================================================
+# CLAUDE CODE IGNORE - CLASSIFIEDS APP
+# Prevents token waste while keeping full coding functionality.
+# ====================================================================
+
+# 1. Absolute top priority: 76MB external dependencies
+node_modules/
+vendor/
+
+# 2. Local media & uploads (Prevents binary text pollution in context)
+private-uploads/
+public/
+storage/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.pdf
+
+# 3. Security & API Keys (Protects your secrets and balances limits)
+# .env
+# .env.*
+# config/local.json
+
+# 4. System & Version Control
+.git/
+.gitignore
+.DS_Store
+Thumbs.db
+
+# 5. Logs and Temp Files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.tmp/

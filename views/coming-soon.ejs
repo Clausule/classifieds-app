@@ -1,0 +1,20 @@
+<%- include('partials/header') %>
+
+<div class="container" style="padding-top:60px;text-align:center;max-width:480px;">
+  <h1><%= t('coming_soon.title') %></h1>
+  <p style="color:var(--ink-soft);"><%= t('coming_soon.message') %></p>
+
+  <% if (currentUser.launch_notify_confirmed_at) { %>
+    <p style="margin-top:16px;font-weight:500;"><%= t('coming_soon.confirmed') %></p>
+  <% } else { %>
+    <form method="POST" action="/launch-notify" style="margin-top:16px;">
+      <button type="submit" class="btn btn-brand"><%= t('coming_soon.notify_button') %></button>
+    </form>
+  <% } %>
+
+  <form action="/logout" method="POST" style="margin-top:20px;">
+    <button type="submit" class="btn btn-outline btn-sm"><%= t('nav.logout') %></button>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,9 @@
+<div class="form-row" style="max-width:200px;margin-left:auto;margin-bottom:16px;">
+  <select id="auth_lang" aria-label="<%= t('account_settings.communication_language_label') %>" onchange="window.location.href = '?lang=' + this.value">
+    <option value="nl" <%= locale === 'nl' ? 'selected' : '' %>><%= t('account_settings.language_nl') %></option>
+    <option value="en" <%= locale === 'en' ? 'selected' : '' %>><%= t('account_settings.language_en') %></option>
+    <option value="es" <%= locale === 'es' ? 'selected' : '' %>><%= t('account_settings.language_es') %></option>
+    <option value="pt" <%= locale === 'pt' ? 'selected' : '' %>><%= t('account_settings.language_pt') %></option>
+    <option value="ru" <%= locale === 'ru' ? 'selected' : '' %>><%= t('account_settings.language_ru') %></option>
+  </select>
+</div>

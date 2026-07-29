@@ -1,0 +1,53 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="max-width:680px;padding-top:28px;">
+  <a href="/admin/messages" style="font-size:13px;color:var(--ink-soft);">&larr; Terug naar inbox</a>
+  <h1>Berichten — <%= threadUser.name %></h1>
+  <p class="form-hint"><%= threadUser.email %></p>
+
+  <%
+    const channelTabs = [
+      { key: 'all', label: 'Alle' },
+      { key: 'web', label: 'Inbox' },
+      { key: 'whatsapp', label: 'WhatsApp' },
+      { key: 'sms', label: 'Sms' },
+      { key: 'email', label: 'E-mail' },
+    ];
+    const channelBadgeLabels = { web: 'Inbox', whatsapp: 'WhatsApp', sms: 'Sms', email: 'E-mail' };
+  %>
+  <div style="display:flex;gap:6px;margin:16px 0;flex-wrap:wrap;">
+    <% channelTabs.forEach(function(tab) { %>
+      <a href="/admin/messages/<%= threadUser.id %>?channel=<%= tab.key %>"
+         class="btn btn-sm <%= activeChannel === tab.key ? 'btn-primary' : 'btn-outline' %>">
+        <%= tab.label %> (<%= channelCounts[tab.key] || 0 %>)
+      </a>
+    <% }) %>
+  </div>
+
+  <div class="message-thread">
+    <% if (messages.length === 0) { %>
+      <p class="form-hint">Geen berichten in dit kanaal.</p>
+    <% } %>
+    <% messages.forEach(function(m) { %>
+      <div class="msg msg-<%= m.sender %>">
+        <% if (m.listing_title) { %><div style="font-size:11px;opacity:0.7;margin-bottom:4px;">Over: <%= m.listing_title %></div><% } %>
+        <% if (m.subject) { %><div style="font-weight:600;margin-bottom:2px;"><%= m.subject %></div><% } %>
+        <div><%= m.body %></div>
+        <div class="msg-meta">
+          <%= new Date(m.created_at).toLocaleString('nl-NL') %>
+          <% if (channelBadgeLabels[m.channel]) { %><span class="badge badge-active" style="margin-left:6px;">via <%= channelBadgeLabels[m.channel] %></span><% } %>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <form method="POST" action="/admin/messages/<%= threadUser.id %>" class="card">
+    <div class="form-row">
+      <label for="body">Antwoord</label>
+      <textarea id="body" name="body" required placeholder="Typ je antwoord..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Versturen</button>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

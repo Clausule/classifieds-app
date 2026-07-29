@@ -1,0 +1,42 @@
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-columns">
+        <div class="footer-col">
+          <p class="footer-col-title"><%= t('footer.group_about') %></p>
+          <% legalPages.filter(function(p) { return p.footerGroup === 'Quickie.nu'; }).forEach(function(p) { %><a href="<%= locale === 'en' ? '/en' : '' %>/<%= p.slug %>"><%= t(p.navLabelKey) %></a><% }) %>
+          <a href="<%= locale === 'en' ? '/en' : '' %>/over-quickie#bedrijfsgegevens"><%= t('footer.contact') %></a>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title"><%= t('footer.group_policy') %></p>
+          <% legalPages.filter(function(p) { return p.footerGroup === 'Beleid'; }).forEach(function(p) { %><a href="<%= locale === 'en' ? '/en' : '' %>/<%= p.slug %>"><%= t(p.navLabelKey) %></a><% }) %>
+        </div>
+        <% if (!(typeof currentUser !== 'undefined' && currentUser)) { %>
+        <div class="footer-col">
+          <p class="footer-col-title"><%= t('footer.group_advertise') %></p>
+          <a href="<%= locale === 'en' ? '/en' : '' %>/login" data-ga-cta="login"><%= t('footer.login') %></a>
+          <a href="<%= locale === 'en' ? '/en' : '' %>/register" data-ga-cta="register"><%= t('footer.new_listing') %></a>
+        </div>
+        <% } %>
+      </div>
+      <div class="footer-mark" aria-hidden="true"><%- include('brand-mark') %></div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-meta">
+        <%= t('footer.copyright', { year: new Date().getFullYear() }) %>
+        <% if (!(typeof usingAccountLocale !== 'undefined' && usingAccountLocale)) { %>
+          &middot;
+          <a href="<%= locale === 'en' ? localePath : ('/en' + localePath) %>"><%= t('common.language_switch') %></a>
+        <% } %>
+      </div>
+    </div>
+  </footer>
+  <script>
+    document.addEventListener('click', function (e) {
+      var el = e.target.closest('[data-ga-cta]');
+      if (el && typeof gtag === 'function') {
+        gtag('event', 'footer_cta_click', { cta: el.dataset.gaCta });
+      }
+    });
+  </script>
+</body>
+</html>

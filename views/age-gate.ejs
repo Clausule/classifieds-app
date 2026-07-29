@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XJ53LDVYF0"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-XJ53LDVYF0');
+  </script>
+  <!-- Ahrefs web analytics -->
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="E7KpoMVLEGU6zjw2zIUjLQ" async></script>
+  <title><%= t('age_gate.title') %> — Quickie.nu</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0097be">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="age-gate">
+    <div class="age-gate-window">
+      <div class="age-gate-logo"><%- include('partials/logo-mark') %></div>
+      <p class="age-gate-notice"><%= t('age_gate.notice') %></p>
+      <p class="age-gate-consent"><%= t('age_gate.consent') %></p>
+      <div class="age-gate-actions">
+        <form method="POST" action="/age-gate/confirm">
+          <button type="submit" class="btn btn-brand btn-block"><%= t('age_gate.confirm') %></button>
+        </form>
+        <a href="https://www.vatican.va" class="btn btn-outline btn-block"><%= t('age_gate.leave') %></a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

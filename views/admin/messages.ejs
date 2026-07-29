@@ -1,0 +1,41 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="padding-top:28px;">
+  <div class="page-head">
+    <h1>Support inbox</h1>
+    <a href="/admin/whatsapp-simulator" class="btn btn-outline btn-sm">WhatsApp-simulator</a>
+  </div>
+  <div class="admin-tabs">
+    <a href="/admin">Overzicht</a>
+    <a href="/admin/listings">Listings</a>
+    <a href="/admin/verificaties">Verificaties</a>
+    <a href="/admin/users">Gebruikers</a>
+    <a href="/admin/messages" class="active">Support inbox</a>
+    <a href="/admin/reports">Meldingen</a>
+    <a href="/admin/instellingen">Instellingen</a>
+  </div>
+
+  <% if (threads.length === 0) { %>
+    <div class="empty-state">Nog geen berichten van gebruikers.</div>
+  <% } else { %>
+    <table class="admin-table">
+      <thead><tr><th>Gebruiker</th><th>Laatste bericht</th><th>Datum</th><th></th></tr></thead>
+      <tbody>
+        <% threads.forEach(function(t) { %>
+          <tr>
+            <td><%= t.name %><br><span style="color:var(--ink-soft);font-size:12px;"><%= t.email %></span></td>
+            <td style="max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= t.last_message %></td>
+            <td><%= new Date(t.last_at).toLocaleString('nl-NL') %></td>
+            <td>
+              <a href="/admin/messages/<%= t.user_id %>" class="btn btn-sm btn-primary">
+                Openen<% if (t.unread > 0) { %> (<%= t.unread %>)<% } %>
+              </a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

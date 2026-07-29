@@ -1,0 +1,12 @@
+node_modules/
+.env
+db/*.db
+db/*.db-shm
+db/*.db-wal
+db/*.sqlite
+public/uploads/*
+!public/uploads/.gitkeep
+private-uploads/id-documents/*
+!private-uploads/id-documents/.gitkeep
+.DS_Store
+.claude/settings.local.json

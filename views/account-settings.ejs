@@ -1,0 +1,178 @@
+<%- include('partials/header') %>
+
+<div class="container" style="max-width:560px;padding-top:28px;">
+  <h1><%= t('account_settings.title') %></h1>
+
+  <% if (saved && !verificationLink) { %><div class="alert alert-success"><%= t('account_settings.saved') %></div><% } %>
+  <% if (error) { %><div class="alert alert-error"><%= t(error) %></div><% } %>
+  <% if (typeof passwordSaved !== 'undefined' && passwordSaved) { %><div class="alert alert-success"><%= t('account_settings.password_saved') %></div><% } %>
+  <% if (typeof passwordError !== 'undefined' && passwordError) { %><div class="alert alert-error"><%= t(passwordError) %></div><% } %>
+
+  <% if (verificationLink) { %>
+    <div class="card" style="margin-bottom:16px;">
+      <p><%- t('account_settings.email_changed', { email: email }) %></p>
+      <p style="word-break:break-all;"><a href="<%= verificationLink %>"><%= verificationLink %></a></p>
+    </div>
+  <% } %>
+
+  <% if (typeof phoneCodeSent !== 'undefined' && phoneCodeSent) { %>
+    <div class="card" style="margin-bottom:16px;">
+      <p><%= t('account_settings.phone_changed') %></p>
+      <% if (phoneMockCode) { %><p class="form-hint"><%= t('account_settings.mock_code_prefix') %> <strong><%= phoneMockCode %></strong></p><% } %>
+    </div>
+  <% } %>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h3 style="margin-top:0;"><%= t('account_settings.communication_language_label') %></h3>
+    <form method="POST" action="/account/settings/language">
+      <div class="form-row" style="margin-bottom:0;">
+        <% if (typeof languageSaved !== 'undefined' && languageSaved) { %><div class="alert alert-success" style="margin-bottom:10px;"><%= t('account_settings.saved') %></div><% } %>
+        <select id="preferred_language" name="preferred_language" aria-label="<%= t('account_settings.communication_language_label') %>" onchange="this.form.submit()">
+          <option value="nl" <%= (currentUser.preferred_language || locale) === 'nl' ? 'selected' : '' %>><%= t('account_settings.language_nl') %></option>
+          <option value="en" <%= (currentUser.preferred_language || locale) === 'en' ? 'selected' : '' %>><%= t('account_settings.language_en') %></option>
+          <option value="es" <%= currentUser.preferred_language === 'es' ? 'selected' : '' %>><%= t('account_settings.language_es') %></option>
+          <option value="pt" <%= currentUser.preferred_language === 'pt' ? 'selected' : '' %>><%= t('account_settings.language_pt') %></option>
+          <option value="ru" <%= currentUser.preferred_language === 'ru' ? 'selected' : '' %>><%= t('account_settings.language_ru') %></option>
+        </select>
+        <p class="form-hint"><%= t('account_settings.communication_language_hint') %></p>
+      </div>
+    </form>
+  </div>
+
+  <form method="POST" class="card">
+    <h3 style="margin-top:0;"><%= t('account_settings.contact_heading') %></h3>
+    <p class="form-hint" style="margin-bottom:16px;"><%= profile ? t('account_settings.contact_change_hint') : t('account_settings.email_only_change_hint') %></p>
+    <div class="form-row">
+      <label for="email">
+        <%= t('account_settings.email_label') %>
+        <span class="badge badge-<%= currentUser.email_verified_at ? 'active' : 'rejected' %>" style="margin-left:6px;"><%= currentUser.email_verified_at ? t('account_verify.verified') : t('account_verify.not_verified') %></span>
+      </label>
+      <input type="email" id="email" name="email" required value="<%= email %>">
+      <% if (!currentUser.email_verified_at) { %>
+        <button type="submit" formaction="/account/verify/email/resend" class="btn btn-outline btn-sm" style="margin-top:6px;"><%= t('account_settings.resend_verification_email') %></button>
+      <% } %>
+    </div>
+
+    <% if (profile) { %>
+      <%
+        function countryLabel(dialCode) {
+          var c = countries.find(function (x) { return x.dialCode === dialCode; });
+          return c ? c.name + ' (+' + c.dialCode + ')' : '';
+        }
+      %>
+      <div class="form-row">
+        <label>
+          <%= t('account_settings.phone_label') %>
+          <span class="badge badge-<%= profile.phone_verified_at ? 'active' : 'rejected' %>" style="margin-left:6px;"><%= profile.phone_verified_at ? t('account_verify.verified') : t('account_verify.not_verified') %></span>
+        </label>
+        <div class="phone-field-group">
+          <div style="position:relative;">
+            <input type="text" id="phone_country_search" autocomplete="off" placeholder="<%= t('account_verify.country_search_placeholder') %>" value="<%= countryLabel(profile.phone_code) %>">
+            <input type="hidden" id="phone_code" name="phone_code" value="<%= profile.phone_code || '' %>">
+            <div class="suggestions-list" id="phone_country_suggestions" style="display:none;"></div>
+          </div>
+          <input type="text" id="phone_number" name="phone_number" required value="<%= profile.phone_number || '' %>">
+        </div>
+        <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 0;"><%= t('account_settings.phone_shown_on_ads') %></p>
+      </div>
+    <% } %>
+
+    <button type="submit" class="btn btn-brand btn-block" style="margin-top:12px;"><%= t('account_settings.save') %></button>
+  </form>
+
+  <% if (profile) { %>
+    <%- include('partials/phone-verify', { profile, query: typeof query !== 'undefined' ? query : {} }) %>
+  <% } %>
+
+  <div class="card" style="margin-top:16px;">
+    <h3 style="margin-top:0;"><%= t('account_settings.password_heading') %></h3>
+    <form method="POST" action="/account/settings/password">
+      <div class="form-row">
+        <label for="current_password"><%= t('account_settings.password_current_label') %></label>
+        <input type="password" id="current_password" name="current_password" autocomplete="current-password" required>
+      </div>
+      <div class="form-row">
+        <label for="new_password"><%= t('account_settings.password_new_label') %></label>
+        <input type="password" id="new_password" name="new_password" autocomplete="new-password" required>
+        <p class="form-hint"><%= t('account_settings.password_new_hint') %></p>
+      </div>
+      <div class="form-row">
+        <label for="confirm_password"><%= t('account_settings.password_confirm_label') %></label>
+        <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required>
+      </div>
+      <button type="submit" class="btn btn-brand btn-block" style="margin-top:12px;"><%= t('account_settings.password_save') %></button>
+    </form>
+  </div>
+
+  <% if (profile) { %>
+    <div class="card" style="margin-top:16px;">
+      <h3 style="margin-top:0;"><%= t('account_settings.two_factor_heading') %></h3>
+      <% if (!profile.phone_verified_at) { %>
+        <p class="form-hint"><%= t('account_settings.two_factor_verify_first') %></p>
+      <% } else { %>
+        <form method="POST" action="/account/settings">
+          <input type="hidden" name="settings_form" value="toggle-2fa">
+          <input type="hidden" name="email" value="<%= email %>">
+          <input type="hidden" name="phone_code" value="<%= profile.phone_code || '' %>">
+          <input type="hidden" name="phone_number" value="<%= profile.phone_number || '' %>">
+          <label style="display:flex;align-items:center;gap:8px;font-weight:400;font-size:14px;cursor:pointer;">
+            <input type="checkbox" name="two_factor_enabled" onchange="this.form.submit()" <%= twoFactorEnabled ? 'checked' : '' %> style="width:auto;">
+            <%= t('account_settings.two_factor_checkbox') %>
+          </label>
+        </form>
+      <% } %>
+    </div>
+  <% } %>
+</div>
+
+<script>
+  // Land-typeahead voor de telefoon-landcode-velden: toont "Land (+code)",
+  // slaat alleen de code op in het verborgen veld dat echt verstuurd wordt.
+  (function () {
+    var countries = <%- JSON.stringify(countries) %>;
+
+    function label(c) { return c.name + ' (+' + c.dialCode + ')'; }
+
+    function setup(searchId, hiddenId, suggestionsId) {
+      var search = document.getElementById(searchId);
+      var hidden = document.getElementById(hiddenId);
+      var box = document.getElementById(suggestionsId);
+      if (!search) return;
+
+      function render(matches) {
+        box.innerHTML = '';
+        if (!matches.length) { box.style.display = 'none'; return; }
+        matches.slice(0, 8).forEach(function (c) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = label(c);
+          btn.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            search.value = label(c);
+            hidden.value = c.dialCode;
+            box.style.display = 'none';
+          });
+          box.appendChild(btn);
+        });
+        box.style.display = 'block';
+      }
+
+      search.addEventListener('input', function () {
+        hidden.value = '';
+        var term = search.value.trim().toLowerCase();
+        if (!term) { box.style.display = 'none'; return; }
+        render(countries.filter(function (c) {
+          return c.name.toLowerCase().indexOf(term) !== -1 || c.dialCode.indexOf(term) !== -1;
+        }));
+      });
+
+      search.addEventListener('blur', function () {
+        setTimeout(function () { box.style.display = 'none'; }, 150);
+      });
+    }
+
+    setup('phone_country_search', 'phone_code', 'phone_country_suggestions');
+  })();
+</script>
+
+<%- include('partials/footer') %>

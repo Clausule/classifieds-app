@@ -1,0 +1,35 @@
+<%- include('partials/header') %>
+
+<div class="container" style="max-width:560px;padding-top:28px;">
+  <h1><%= t('account_verify_submitted.title') %></h1>
+
+  <% if (verificationLink) { %>
+    <div class="card">
+      <p><%= t('account_verify_submitted.email_sent') %></p>
+      <p style="word-break:break-all;"><a href="<%= verificationLink %>"><%= verificationLink %></a></p>
+      <p class="form-hint">
+        <%= t('account_verify_submitted.dev_hint') %>
+      </p>
+      <a href="<%= verificationLink %>" class="btn btn-brand btn-block" style="margin-top:8px;"><%= t('account_verify_submitted.confirm_email') %></a>
+    </div>
+  <% } else { %>
+    <div class="alert alert-success"><%= t('account_verify_submitted.already_verified') %></div>
+  <% } %>
+
+  <% if (typeof phoneCodeSent !== 'undefined' && phoneCodeSent) { %>
+    <div class="card" style="margin-top:16px;">
+      <p><%= t('account_verify_submitted.sms_sent') %></p>
+      <% if (phoneMockCode) { %>
+        <p class="form-hint"><%= t('account_verify_submitted.mock_code_prefix') %> <strong><%= phoneMockCode %></strong></p>
+      <% } %>
+      <a href="/account/verify" class="btn btn-outline btn-block" style="margin-top:8px;"><%= t('account_verify_submitted.enter_code') %></a>
+    </div>
+  <% } %>
+
+  <p style="margin-top:20px;">
+    <%= t('account_verify_submitted.pending_notice') %>
+  </p>
+  <a href="/account/verify" class="btn btn-outline"><%= t('account_verify_submitted.back_to_data') %></a>
+</div>
+
+<%- include('partials/footer') %>

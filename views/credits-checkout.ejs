@@ -1,0 +1,26 @@
+<%- include('partials/header') %>
+
+<div class="container auth-shell">
+  <div class="card">
+    <span class="badge badge-pending" style="margin-bottom:12px;"><%= t('credits_checkout.test_mode_badge') %></span>
+    <h1 style="margin-top:10px;"><%= t('credits_checkout.title') %></h1>
+    <p class="form-hint"><%= purchase.credits %> <%= t(purchase.credits === 1 ? 'common.credit_singular' : 'common.credit_plural') %></p>
+
+    <div class="ticket-price" style="font-size:28px;margin:16px 0;">
+      &euro;<%= purchase.amount.toFixed(2) %>
+    </div>
+
+    <p class="form-hint">
+      <%= t('credits_checkout.hint') %>
+    </p>
+
+    <form method="POST" action="/credits-checkout/<%= purchase.id %>/simulate" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
+      <button type="submit" name="status" value="paid" class="btn btn-brand btn-block"><%= t('credits_checkout.simulate_paid') %></button>
+      <button type="submit" name="status" value="failed" class="btn btn-danger btn-block"><%= t('credits_checkout.simulate_failed') %></button>
+      <button type="submit" name="status" value="expired" class="btn btn-outline btn-block"><%= t('credits_checkout.simulate_expired') %></button>
+      <button type="submit" name="status" value="canceled" class="btn btn-outline btn-block"><%= t('credits_checkout.cancel') %></button>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
