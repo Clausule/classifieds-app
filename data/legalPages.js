@@ -42,7 +42,6 @@ module.exports = [
         type: 'lines',
         itemKeys: [
           'legal.over_quickie.company_lines.brand',
-          'legal.over_quickie.company_lines.name',
           'legal.over_quickie.company_lines.kvk',
           'legal.over_quickie.company_lines.vat',
           'legal.over_quickie.company_lines.email',

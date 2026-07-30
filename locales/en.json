@@ -556,10 +556,9 @@
   "legal.over_quickie.more_info_p": "Want to know more about how we handle privacy, verification and safety? Also check out:",
   "legal.over_quickie.h2_company": "Company details",
   "legal.over_quickie.company_lines.brand": "Quickie.nu",
-  "legal.over_quickie.company_lines.name": "[Company name]",
   "legal.over_quickie.company_lines.kvk": "Chamber of Commerce (KvK): [number]",
-  "legal.over_quickie.company_lines.vat": "VAT: [number] (if applicable)",
-  "legal.over_quickie.company_lines.email": "Email: [email address]",
+  "legal.over_quickie.company_lines.vat": "VAT: [number]",
+  "legal.over_quickie.company_lines.email": "Email: contact@quickie.nu",
 
   "legal.verificatiebeleid.nav_label": "Verification policy",
   "legal.verificatiebeleid.meta_title": "Verification policy",

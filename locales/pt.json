@@ -374,10 +374,9 @@
   "legal.over_quickie.more_info_p": "Quer saber mais sobre como lidamos com a privacidade, verificação e segurança? Consulte também:",
   "legal.over_quickie.h2_company": "Dados da empresa",
   "legal.over_quickie.company_lines.brand": "Quickie.nu",
-  "legal.over_quickie.company_lines.name": "[Nome da empresa]",
   "legal.over_quickie.company_lines.kvk": "Registo comercial (KvK): [número]",
-  "legal.over_quickie.company_lines.vat": "IVA: [número] (se aplicável)",
-  "legal.over_quickie.company_lines.email": "E-mail: [endereço de e-mail]",
+  "legal.over_quickie.company_lines.vat": "IVA: [número]",
+  "legal.over_quickie.company_lines.email": "E-mail: contact@quickie.nu",
 
   "legal.verificatiebeleid.nav_label": "Política de verificação",
   "legal.verificatiebeleid.meta_title": "Política de verificação",

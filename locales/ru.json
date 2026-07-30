@@ -373,10 +373,9 @@
   "legal.over_quickie.more_info_p": "Хотите узнать больше о том, как мы относимся к конфиденциальности, проверке и безопасности? Ознакомьтесь также с:",
   "legal.over_quickie.h2_company": "Реквизиты компании",
   "legal.over_quickie.company_lines.brand": "Quickie.nu",
-  "legal.over_quickie.company_lines.name": "[Название компании]",
   "legal.over_quickie.company_lines.kvk": "Торговый реестр (KvK): [номер]",
-  "legal.over_quickie.company_lines.vat": "НДС: [номер] (если применимо)",
-  "legal.over_quickie.company_lines.email": "Email: [адрес электронной почты]",
+  "legal.over_quickie.company_lines.vat": "НДС: [номер]",
+  "legal.over_quickie.company_lines.email": "Email: contact@quickie.nu",
 
   "legal.verificatiebeleid.nav_label": "Политика проверки",
   "legal.verificatiebeleid.meta_title": "Политика проверки",

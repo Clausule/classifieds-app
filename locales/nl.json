@@ -556,10 +556,9 @@
   "legal.over_quickie.more_info_p": "Wilt u meer weten over hoe wij omgaan met privacy, verificatie en veiligheid? Bekijk dan ook ons:",
   "legal.over_quickie.h2_company": "Bedrijfsgegevens",
   "legal.over_quickie.company_lines.brand": "Quickie.nu",
-  "legal.over_quickie.company_lines.name": "[Bedrijfsnaam]",
   "legal.over_quickie.company_lines.kvk": "KvK: [nummer]",
-  "legal.over_quickie.company_lines.vat": "BTW: [nummer] (indien van toepassing)",
-  "legal.over_quickie.company_lines.email": "E-mail: [e-mailadres]",
+  "legal.over_quickie.company_lines.vat": "BTW: [nummer]",
+  "legal.over_quickie.company_lines.email": "E-mail: contact@quickie.nu",
 
   "legal.verificatiebeleid.nav_label": "Verificatiebeleid",
   "legal.verificatiebeleid.meta_title": "Verificatiebeleid",
