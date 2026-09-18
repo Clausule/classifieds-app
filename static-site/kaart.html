@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8">
+    <style>
+	html, body, #map {
+		height: 100%; margin: 0; padding: 0; overflow: hidden;
+		}
+	gmp-internal-camera-control, .gm-camera-control { display: none !important;
+		}
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      function initMap() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const lat = parseFloat(urlParams.get('lat')) || 52.3676;
+        const lng = parseFloat(urlParams.get('lng')) || 4.9041;
+        const centerCoordinates = { lat: lat, lng: lng };
+
+        const map = new google.maps.Map(document.getElementById("map"), {
+          center: centerCoordinates, zoom: 14, mapTypeId: 'roadmap', fullscreenControl: false, mapTypeControl: false, streetViewControl: false, keyboardShortcuts: false
+        });
+
+        new google.maps.Circle({
+          strokeColor: "rgb(0, 151, 190)", strokeOpacity: 0.8, strokeWeight: 2,
+          fillColor: "rgb(0, 151, 190)", fillOpacity: 0.20, map: map,
+          center: centerCoordinates, radius: 500
+        });
+      }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPqIN_hEEzrlroh0RZz_SeVqwhNwf4QuE&callback=initMap"></script>
+  </body>
+</html>
