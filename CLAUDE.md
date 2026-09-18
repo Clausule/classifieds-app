@@ -18,11 +18,12 @@ middleware/   auth.js — loadUser (elke request), requireAuth, requireAdmin
 routes/       auth, listings (publiek + adverteerder CRUD), dashboard, admin, payments
 views/        EJS, views/admin/ voor het CMS, views/partials/ voor gedeelde stukken
 public/       css/style.css (design tokens als CSS-variabelen), uploads/ (listing-foto's)
-static-site/  kopie van de statische SEO-site (12 HTML-pagina's + images/, robots.txt,
+static-site/  OFFICIËLE lokale bron van de statische SEO-site (12 HTML-pagina's + images/, robots.txt,
               sitemaps) die nginx los serveert uit /var/www/quickie-static op de VPS
               — blijven permanent onderdeel van de site; vanuit de Node-app alleen
               bereikbaar via het SEO-contentblok op de homepage. Niet in public/
               zetten (duplicate content) en uitgesloten van de rsync-deploy.
+              Workflow: hier aanpassen → committen → scp naar de server.
 ```
 
 `config/database.js` leest `db/schema.sql` en voert 'm bij **elke boot** opnieuw uit
@@ -105,8 +106,8 @@ herstart, geen aparte migratiestap nodig.
   `Sitemap:`-regel toevoegen aan het robots.txt van de bestaande site. De
   bestaande statische pagina's/afbeeldingen (`public_html/*.html`,
   `public_html/images/`) en hun eigen `robots.txt` + `sitemap.xml` (lokale
-  kopie: `static-site/` in dit project, oudere kopie in
-  `~/Desktop/Desktop/Quickie/public_html/`) blijven ongewijzigd — daar
+  bron: `static-site/` in dit project — `~/Desktop/Desktop/Quickie/public_html/`
+  is verouderd, niet meer gebruiken) blijven ongewijzigd — daar
   is `Disallow: /admin/ /account/ /dashboard/ /login /uploads/` al aan
   toegevoegd voor de nieuwe Node-only paden.
 - **Advertisers: frontend + legal-pagina's volgens accounttaal (spec vastgelegd
