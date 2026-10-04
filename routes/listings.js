@@ -23,6 +23,25 @@ const router = express.Router();
 
 const PAGE_SIZE = 12;
 const UPLOAD_DIR = path.join(__dirname, '..', 'public', 'uploads');
+
+// Kaartafbeeldingen komen van de betaalde Google Static Maps API en kostten
+// vóór deze cache één request per pageview — één SEO-crawler langs alle
+// advertentiepagina's legde daarmee op 25-09-2026 het hele Maps-project plat.
+// Nu haalt de server elke kaart hooguit één keer op. Buiten public/ zodat er
+// geen tweede, rechtstreeks bereikbare URL voor hetzelfde plaatje ontstaat;
+// de map staat in .gitignore en wordt niet meegesynct bij een deploy.
+const MAP_CACHE_DIR = path.join(__dirname, '..', 'map-cache');
+fs.mkdirSync(MAP_CACHE_DIR, { recursive: true });
+
+// Sleutel op het adres, niet op het listing-id: twee advertenties in dezelfde
+// buurt delen dezelfde kaart, en verhuist een advertentie naar een andere
+// buurt dan mist hij vanzelf en wordt er een nieuwe opgehaald. Geen TTL —
+// gemeentegrenzen veranderen niet, en een verlopen cache zou juist weer geld
+// kosten. Opruimen kan altijd met `rm -rf map-cache`.
+function mapCacheFile(address) {
+  const hash = require('crypto').createHash('sha1').update(address).digest('hex');
+  return path.join(MAP_CACHE_DIR, `${hash}.png`);
+}
 const CONVERT_TO_WEBP = process.env.IMAGE_CONVERT_WEBP === 'true';
 
 // iPhone-foto's zijn vaak HEIC — zet die om naar JPEG zodat ze in elke browser
@@ -1065,6 +1084,13 @@ router.get('/listings/:id/map.png', async (req, res) => {
     return res.status(404).end();
   }
 
+  const cacheFile = mapCacheFile(address);
+  if (fs.existsSync(cacheFile)) {
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=86400');
+    return res.sendFile(cacheFile);
+  }
+
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
     return res.status(500).end();
@@ -1113,6 +1139,14 @@ router.get('/listings/:id/map.png', async (req, res) => {
     }
 
     const buffer = Buffer.from(await mapRes.arrayBuffer());
+    // Mislukt het wegschrijven (volle schijf, rechten), dan is dat geen reden
+    // om de bezoeker een kapotte kaart te tonen — hooguit haalt de volgende
+    // bezoeker hem opnieuw op.
+    try {
+      fs.writeFileSync(cacheFile, buffer);
+    } catch (err) {
+      console.error('Kaart niet naar cache kunnen schrijven:', err);
+    }
     res.set('Content-Type', 'image/png');
     res.set('Cache-Control', 'public, max-age=86400');
     res.send(buffer);

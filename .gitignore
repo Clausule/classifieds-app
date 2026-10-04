@@ -10,3 +10,4 @@ private-uploads/id-documents/*
 !private-uploads/id-documents/.gitkeep
 .DS_Store
 .claude/settings.local.json
+map-cache/

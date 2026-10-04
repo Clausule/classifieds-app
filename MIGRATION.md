@@ -73,12 +73,14 @@ vlag omgaat:
     --exclude 'db/*.db' --exclude 'db/*.db-wal' --exclude 'db/*.db-shm' \
     --exclude sessions.db --exclude 'sessions.db-wal' --exclude 'sessions.db-shm' \
     --exclude public/uploads --exclude private-uploads \
-    --exclude static-site \
+    --exclude static-site --exclude map-cache --exclude backups \
     ./ vps:/pad/naar/app
   ```
   `static-site/` is een lokale kopie (onder git) van de statische SEO-pagina's
   die nginx los serveert vanuit `/var/www/quickie-static` — die hoort niet in de
-  app-map. Wijzigingen daaraan apart uploaden met
+  app-map. `map-cache/` is de lokaal opgebouwde cache van Google Static
+  Maps-afbeeldingen en `backups/` bevat snapshots — allebei machine-specifiek,
+  die horen niet over te komen. Wijzigingen daaraan apart uploaden met
   `scp static-site/<bestand> quickie-vps:/var/www/quickie-static/`.
   **Quote elk `--exclude`-patroon met een `*` erin** (`'db/*.db'`, niet
   `db/*.db`) — anders expandeert de lokale shell het glob vóórdat rsync het
