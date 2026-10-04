@@ -6,5 +6,15 @@ Disallow: /dashboard/
 Disallow: /login
 Disallow: /uploads/
 
+# Ahrefs volledig geweerd: de Site Audit-crawler liep op 25-09-2026 in een half
+# uur door alle advertentiepagina's en haalde daarbij tientallen Google Static
+# Maps-afbeeldingen op (85-140 KB per stuk, betaald per request). Direct daarna
+# weigerde Google Maps alles wegens ontbrekende/opgebruikte billing.
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: AhrefsSiteAudit
+Disallow: /
+
 Sitemap: https://quickie.nu/sitemap.xml
 Sitemap: https://quickie.nu/sitemap-images.xml
