@@ -1221,6 +1221,10 @@ table.admin-table tr:hover td { background: var(--panel); }
    ongeluk een verkeerde margin-top op toen de volgorde omgedraaid was). */
 .seo-wrapper h1, .seo-wrapper h2, .seo-wrapper h3, .seo-wrapper h4 { font-size: inherit; color: inherit; }
 
+.home-hero { padding: 22px 0 6px; text-align: center; }
+.home-hero h2 { margin: 0; font-size: 1.5rem; letter-spacing: -0.01em; }
+.home-hero h3 { margin: 6px 0 0; font-size: 1rem; font-weight: 400; color: var(--muted); }
+
 /* De eerste h2 is de oude paginatitel: stond tot 2026-10-04 in een
    <summary> van een dichtgeklapte <details> en houdt daarom diezelfde
    stille opmaak, nu als gewone kop. De tweede h2 (de FAQ-kop) valt onder

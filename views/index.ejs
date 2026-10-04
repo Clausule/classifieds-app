@@ -1,5 +1,13 @@
 <%- include('partials/header') %>
 
+<%# Merkregel + slogan stonden tot 2026-10-04 onderaan in het SEO-blok; staan
+    hier bovenaan zodat de zoekwoordregel weer boven in de HTML valt, zoals op
+    de oude statische homepage. Verhuist terug bij operationeel (GO-LIVE.md). %>
+<div class="container home-hero">
+  <h2><%= t('home.hero_title') %></h2>
+  <h3><%= t('home.hero_tagline') %></h3>
+</div>
+
 <%
   var selectedPrices = ([]).concat(query.price || []).map(String);
   function buildQueryString(overrides) {

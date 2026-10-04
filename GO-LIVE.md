@@ -52,6 +52,20 @@ en horen terug zodra er echte advertenties staan:
   advertenties echt zijn. Let op: de eerste `h2` zit dan weer in een
   `<summary>`, en `public/css/style.css` selecteert nu op
   `.seo-details > h2:first-child`.
+- `home.meta_title` en `home.meta_description` in `locales/nl.json` staan sinds
+  2026-10-04 weer exact op de teksten van de oude statische homepage
+  ("Informatie over sex advertenties en thuisontvangst" / "Hier vind je een
+  compleet overzicht ..."), puur om de oude ranking terug te halen. Die zijn
+  informatief, niet commercieel, en noemen het merk niet — zodra de marktplaats
+  operationeel is horen daar weer titel en omschrijving te staan die de
+  advertenties verkopen (zie de git-historie van dit bestand voor de vorige
+  tekst, of `backups/2026-10-04_pre-seo/homepage-live.html`). `locales/en.json`
+  is bewust ongewijzigd gebleven: de oude ranking is Nederlandstalig.
+- De hero bovenaan de homepage (`h2` merkregel + `h3` slogan, `views/index.ejs`,
+  `.home-hero` in `public/css/style.css`) weer naar beneden verhuizen, terug het
+  SEO-blok in boven het article — daar stond hij tot 2026-10-04. Hij staat nu
+  bovenaan omdat de zoekwoordregel daar zwaarder weegt; zodra er echte
+  advertenties staan hoort de bovenkant van de pagina aan de advertenties.
 - Niet automatisch meenemen, maar wel afwegen: `<main>` staat nu om het
   SEO-blok en niet om de advertentielijst. Strikt genomen is die lijst straks
   de hoofdcontent van de pagina.
