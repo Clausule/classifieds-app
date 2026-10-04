@@ -6,15 +6,5 @@ Disallow: /dashboard/
 Disallow: /login
 Disallow: /uploads/
 
-# De kaartafbeeldingen op advertentiepagina's komen van de betaalde Google
-# Static Maps API. De Ahrefs Site Audit-crawler haalde er op 25-09-2026 in een
-# half uur tientallen op en legde daarmee de kaarten plat. Crawlers hebben die
-# plaatjes niet nodig; de rest van de site mogen ze gewoon zien.
-User-agent: AhrefsBot
-Disallow: /listings/*/map.png
-
-User-agent: AhrefsSiteAudit
-Disallow: /listings/*/map.png
-
 Sitemap: https://quickie.nu/sitemap.xml
 Sitemap: https://quickie.nu/sitemap-images.xml
