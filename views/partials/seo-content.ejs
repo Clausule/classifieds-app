@@ -11,12 +11,10 @@
   hun beurt straks door naar de stad-gefilterde advertentie-overzichten hier.
 -->
 <div class="container seo-wrapper">
-  <header>
-    <nav class="seo-related-links seo-inline-row" aria-label="Overzicht van informatie">
-      <p>Overzicht van informatie</p>
-      <% relatedLinks.forEach(function(link) { %><a href="<%= link[0] %>"><%= link[1] %></a><% }) %>
-    </nav>
-  </header>
+  <nav class="seo-related-links seo-inline-row" aria-label="Overzicht van informatie">
+    <p>Overzicht van informatie</p>
+    <% relatedLinks.forEach(function(link) { %><a href="<%= link[0] %>"><%= link[1] %></a><% }) %>
+  </nav>
   <main>
     <div class="seo-details">
 

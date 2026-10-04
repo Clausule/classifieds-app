@@ -1202,11 +1202,11 @@ table.admin-table tr:hover td { background: var(--panel); }
   line-height: 1.6;
   color: var(--ink-soft);
 }
-/* De rand/opening-spacing hoort maar bij één element — header (met de nav
-   erin) is het eerste zichtbare ding in dit blok (altijd zichtbaar, main
-   erna bevat alleen nog de collapsible <details>), dus die draagt de "twee
-   lijnen"-rand. */
-.seo-wrapper > header {
+/* De rand/opening-spacing hoort maar bij één element — de nav is het eerste
+   zichtbare ding in dit blok, dus die draagt de "twee lijnen"-rand. Stond
+   eerder op een <header> om deze nav heen; die wrapper is weg omdat hij
+   niets toevoegde boven de <nav> zelf. */
+.seo-wrapper > .seo-related-links {
   border-top: 1px solid var(--border);
   margin-top: 40px;
   padding: 8px 0 0;
