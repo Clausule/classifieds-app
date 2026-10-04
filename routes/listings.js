@@ -201,6 +201,14 @@ router.get('/', async (req, res) => {
     params.neighborhood = neighborhood;
   }
 
+  // Eén bron voor "de bezoeker heeft zelf iets ingesteld" — ook sorteren en
+  // pagina 2 tellen mee, anders zou de 1-per-stad-weergave hieronder blijven
+  // hangen op een URL waar de bezoeker juist méér verwacht te zien.
+  const hasAnyFilter = !!(
+    q || city || neighborhood || radius || min_price || max_price ||
+    selectedPrices.length || sort || page > 1
+  );
+
   const orderBy =
     sort === 'price_asc' ? 'l.price ASC' :
     sort === 'price_desc' ? 'l.price DESC' :
@@ -209,21 +217,49 @@ router.get('/', async (req, res) => {
 
   const whereClause = where.join(' AND ');
 
-  const total = db.prepare(`SELECT COUNT(*) AS n FROM listings l WHERE ${whereClause}`).get(params).n;
+  // Zolang de marktplaats niet operationeel is staan er alleen fictieve
+  // demo-advertenties (6 per stad). Die alle 30 op de kale homepage tonen
+  // maakt het grootste, meest prominente deel van een geïndexeerde pagina
+  // verzonnen content. Daarom op de ónbewerkte homepage één advertentie per
+  // stad; alles blijft in de database staan en komt gewoon terug zodra de
+  // bezoeker filtert (stad, buurt, straal, prijs, zoeken, sorteren,
+  // paginering) — die takken draaien exact de query hieronder, ongewijzigd.
+  // Verdwijnt vanzelf zodra MARKETPLACE_OPERATIONAL op true gaat.
+  const oneResultPerCity = !MARKETPLACE_OPERATIONAL && !hasAnyFilter;
 
-  const listings = db
-    .prepare(`
+  const total = oneResultPerCity
+    ? db.prepare(`SELECT COUNT(DISTINCT l.location) AS n FROM listings l WHERE ${whereClause}`).get(params).n
+    : db.prepare(`SELECT COUNT(*) AS n FROM listings l WHERE ${whereClause}`).get(params).n;
+
+  const baseSelect = `
       SELECT l.*,
              (CASE WHEN l.premium_until IS NOT NULL AND l.premium_until > datetime('now') THEN 1 ELSE 0 END) AS is_premium_active,
              (SELECT filename FROM listing_images WHERE listing_id = l.id ORDER BY sort_order LIMIT 1) AS thumbnail,
              u.last_active_at,
-             (SELECT MAX(created_at) FROM messages WHERE user_id = l.user_id AND sender = 'user') AS last_message_at
+             (SELECT MAX(created_at) FROM messages WHERE user_id = l.user_id AND sender = 'user') AS last_message_at`;
+
+  const listings = db
+    .prepare(
+      oneResultPerCity
+        ? `
+      SELECT * FROM (${baseSelect},
+             ROW_NUMBER() OVER (PARTITION BY l.location ORDER BY l.created_at DESC) AS rn
+      FROM listings l
+      LEFT JOIN users u ON u.id = l.user_id
+      WHERE ${whereClause}
+      )
+      WHERE rn = 1
+      ORDER BY ${orderBy.replace(/\bl\./g, '')}
+      LIMIT @limit OFFSET @offset
+    `
+        : `${baseSelect}
       FROM listings l
       LEFT JOIN users u ON u.id = l.user_id
       WHERE ${whereClause}
       ORDER BY ${orderBy}
       LIMIT @limit OFFSET @offset
-    `)
+    `
+    )
     .all({ ...params, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
   listings.forEach((l) => {
     l.detailUrl = withLocale(res, listingPath(l));

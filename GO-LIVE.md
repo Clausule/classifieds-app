@@ -70,6 +70,11 @@ en horen terug zodra er echte advertenties staan:
   SEO-blok en niet om de advertentielijst. Strikt genomen is die lijst straks
   de hoofdcontent van de pagina.
 
+Gaat vanzelf goed, alleen ter info: de kale homepage toont zolang de vlag
+`false` is één advertentie per stad (`oneResultPerCity` in `routes/listings.js`).
+Zodra de vlag op `true` staat vervalt dat vanzelf en toont de homepage weer de
+volledige lijst — niets handmatig terug te draaien.
+
 ## 4. In dezelfde stap, hoort bij elkaar
 
 - `sitemap-listings.xml` bouwen: dynamisch uit de DB, zelfde

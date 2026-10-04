@@ -10,7 +10,7 @@
     </figure>
     <div class="ticket-body">
       <div style="display:flex;align-items:center;gap:6px;">
-        <h2 class="ticket-title" style="margin:0;"><%= listing.doll_name %></h2>
+        <div class="ticket-title" style="margin:0;"><%= listing.doll_name %></div>
         <% if (listing.activityStatus) { %>
           <span class="badge <%= listing.activityStatus === 'week' ? 'badge-week' : 'badge-active' %>"><%= t('listing_card.activity_' + listing.activityStatus) %></span>
         <% } %>

@@ -66,6 +66,15 @@ herstart, geen aparte migratiestap nodig.
 - De listingdetailpagina moet ook zichtbaar zijn voor **admins die nog moeten
   beoordelen** (niet alleen voor de eigenaar of bij status `active`) — zie
   `isOwner`/`isAdmin`-check in `routes/listings.js`.
+- De **kale homepage** (geen enkel filter in de URL) toont één advertentie per
+  stad zolang `MARKETPLACE_OPERATIONAL=false` — zie `oneResultPerCity` in
+  `routes/listings.js`. Reden: alleen fictieve demo-advertenties, en die horen
+  niet het grootste deel van een geïndexeerde pagina te vullen. Zodra er ook
+  maar één filter actief is (stad, buurt, straal, prijs, zoeken, sorteren,
+  pagina) draait exact de normale query en zijn alle advertenties gewoon
+  bereikbaar. `total` telt in die tak `COUNT(DISTINCT location)`, anders biedt
+  de paginering een lege pagina 2 aan — en dat zou een indexeerbare lege URL
+  zijn.
 - De "actief"-badge op de listingkaart (`utils/activity.js`, `activityBucket`)
   wordt bepaald door `users.last_active_at` (ingelogde acties) en
   `messages.sender='user'` (WhatsApp + web-berichten). **Auto-renew
