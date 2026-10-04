@@ -40,7 +40,23 @@ gelden al zodra de site technisch live is, niet pas bij deze stap:
 - `MARKETPLACE_OPERATIONAL=true` zetten in `.env` en de app herstarten —
   schakelt `noindex, follow` overal uit (zie `utils/seo.js`)
 
-## 3. In dezelfde stap, hoort bij elkaar
+## 3. Terugdraaien wat tijdelijk voor SEO is aangepast
+
+Op 2026-10-04 is de homepage aangepast omdat hij flink gedaald was in Google na
+het vervangen van de oude statische homepage. Deze punten zijn bewust tijdelijk
+en horen terug zodra er echte advertenties staan:
+
+- De `<details class="seo-details">`-toggle om het SEO-blok terugzetten
+  (`views/partials/seo-content.ejs`, nu een gewone `div`) — het blok stond
+  dichtgeklapt zodat de focus op de advertenties lag; dat klopt weer zodra de
+  advertenties echt zijn. Let op: de eerste `h2` zit dan weer in een
+  `<summary>`, en `public/css/style.css` selecteert nu op
+  `.seo-details > h2:first-child`.
+- Niet automatisch meenemen, maar wel afwegen: `<main>` staat nu om het
+  SEO-blok en niet om de advertentielijst. Strikt genomen is die lijst straks
+  de hoofdcontent van de pagina.
+
+## 4. In dezelfde stap, hoort bij elkaar
 
 - `sitemap-listings.xml` bouwen: dynamisch uit de DB, zelfde
   `SELECT DISTINCT location`-patroon als de stadspagina's
@@ -52,7 +68,7 @@ en hun eigen robots.txt/sitemap.xml blijven ongewijzigd — de
 `Disallow: /admin/ /account/ /dashboard/ /login /uploads/`-regels voor de
 nieuwe Node-paden staan daar al in.
 
-## 4. Optioneel, kan ook later
+## 5. Optioneel, kan ook later
 
 - Lichte `ItemList`-structured-data voor de listingkaarten op de homepage
   (alleen `url`+`name`+`position`, geen volledige `Service`-objecten) —

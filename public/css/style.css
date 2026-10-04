@@ -1221,12 +1221,14 @@ table.admin-table tr:hover td { background: var(--panel); }
    ongeluk een verkeerde margin-top op toen de volgorde omgedraaid was). */
 .seo-wrapper h1, .seo-wrapper h2, .seo-wrapper h3, .seo-wrapper h4 { font-size: inherit; color: inherit; }
 
-.seo-details > summary { cursor: pointer; }
-.seo-details > summary h2 { display: inline; margin: 0; font-family: 'Inter', sans-serif; font-weight: 400; }
-.seo-details > summary:hover h2 { color: var(--ink); }
+/* De eerste h2 is de oude paginatitel: stond tot 2026-10-04 in een
+   <summary> van een dichtgeklapte <details> en houdt daarom diezelfde
+   stille opmaak, nu als gewone kop. De tweede h2 (de FAQ-kop) valt onder
+   de generieke regel eronder. */
+.seo-details > h2:first-child { margin: 0; font-family: 'Inter', sans-serif; font-weight: 400; }
+.seo-details > h2 { margin: 14px 0 6px; }
 .seo-details > h3 { font-weight: 500; margin: 6px 0 14px; }
 .seo-details > article h1 { margin: 0 0 6px; }
-.seo-details > h2 { margin: 14px 0 6px; }
 
 /* Gedeeld patroon: een h4-label naast een rij items die op smallere
    schermen terugvalt op meerdere regels (gebruikt door Handige links en
