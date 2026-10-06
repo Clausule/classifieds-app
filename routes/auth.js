@@ -20,7 +20,10 @@ function completeLogin(req, res, user) {
 
 router.get('/register', useFormLocale, (req, res) => {
   if (req.user) return res.redirect(withLocale(res, '/dashboard'));
-  res.render('register', { title: 'auth.register.title', error: null, form: {} });
+  // noindex: /register stond geïndexeerd en verscheen als sitelink onder de
+  // merkzoekopdracht. Zelfde meta-tag-methode als de listingpagina's (zie
+  // header.ejs), niet de X-Robots-header — één methode voor de hele site.
+  res.render('register', { title: 'auth.register.title', error: null, form: {}, noindex: true });
 });
 
 router.post('/register', useFormLocale, (req, res) => {
@@ -80,7 +83,7 @@ router.post('/register', useFormLocale, (req, res) => {
 
 router.get('/login', (req, res) => {
   if (req.user) return res.redirect(withLocale(res, '/dashboard'));
-  res.render('login', { title: 'auth.login.title', error: null, email: '' });
+  res.render('login', { title: 'auth.login.title', error: null, email: '', noindex: true });
 });
 
 router.post('/login', async (req, res) => {

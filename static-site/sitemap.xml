@@ -140,5 +140,71 @@
       <priority>0.8</priority>
 
 	</url>
+		<url>
+
+      <loc>https://quickie.nu/en/</loc>
+
+      <lastmod>2026-10-06</lastmod>
+
+      <changefreq>monthly</changefreq>
+
+      <priority>1.0</priority>
+
+	</url>
+		<url>
+
+      <loc>https://quickie.nu/veilig-afspreken</loc>
+
+      <lastmod>2026-10-06</lastmod>
+
+      <changefreq>monthly</changefreq>
+
+      <priority>0.6</priority>
+
+	</url>
+		<url>
+
+      <loc>https://quickie.nu/meldprocedure</loc>
+
+      <lastmod>2026-10-06</lastmod>
+
+      <changefreq>monthly</changefreq>
+
+      <priority>0.6</priority>
+
+	</url>
+		<url>
+
+      <loc>https://quickie.nu/verificatiebeleid</loc>
+
+      <lastmod>2026-10-06</lastmod>
+
+      <changefreq>monthly</changefreq>
+
+      <priority>0.6</priority>
+
+	</url>
+		<url>
+
+      <loc>https://quickie.nu/privacybeleid</loc>
+
+      <lastmod>2026-10-06</lastmod>
+
+      <changefreq>monthly</changefreq>
+
+      <priority>0.6</priority>
+
+	</url>
+		<url>
+
+      <loc>https://quickie.nu/cookiebeleid</loc>
+
+      <lastmod>2026-10-06</lastmod>
+
+      <changefreq>monthly</changefreq>
+
+      <priority>0.6</priority>
+
+	</url>
    </urlset>
    

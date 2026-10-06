@@ -73,7 +73,7 @@
       "name": "Overzicht van informatie",
       "itemListElement": [
         <% relatedLinks.forEach(function(link, i) { %>
-        { "@type": "ListItem", "position": <%= i + 1 %>, "url": "<%= siteUrl %>/<%= link[0] %>", "name": <%- JSON.stringify(link[1]) %> }<%= i < relatedLinks.length - 1 ? ',' : '' %>
+        { "@type": "ListItem", "position": <%= i + 1 %>, "url": "<%= siteUrl %><%= link[0] %>", "name": <%- JSON.stringify(link[1]) %> }<%= i < relatedLinks.length - 1 ? ',' : '' %>
         <% }) %>
       ]
     },
@@ -127,7 +127,12 @@
 </head>
 <body>
   <input type="checkbox" id="notice-sluit" class="notice-checkbox">
-  <div class="launch-notice">
+  <%# data-nosnippet: Google bouwde het zoekresultaat op merknaam uit deze
+      melding op (inclusief het kruisje van de sluitknop) i.p.v. uit de meta
+      description. Het attribuut houdt de tekst uit de snippet; zichtbaarheid
+      en indexering veranderen er niet van. De sluitknop hoort binnen deze div
+      te blijven, anders staat het kruisje er alsnog in. %>
+  <div class="launch-notice" data-nosnippet>
     <p><strong><%= tFrontend('notice.launch_title') %></strong> <%= tFrontend('notice.launch_message') %></p>
     <label for="notice-sluit" class="notice-close" title="<%= tFrontend('notice.close_aria') %>">×</label>
   </div>

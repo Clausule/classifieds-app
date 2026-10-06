@@ -3,7 +3,6 @@ Allow: /
 Disallow: /admin/
 Disallow: /account/
 Disallow: /dashboard/
-Disallow: /login
 Disallow: /uploads/
 
 Sitemap: https://quickie.nu/sitemap.xml
