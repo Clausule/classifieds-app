@@ -61,6 +61,11 @@ en horen terug zodra er echte advertenties staan:
   advertenties verkopen (zie de git-historie van dit bestand voor de vorige
   tekst, of `backups/2026-10-04_pre-seo/homepage-live.html`). `locales/en.json`
   is bewust ongewijzigd gebleven: de oude ranking is Nederlandstalig.
+- De 302 van `/?page=N` (zonder filter) naar `/` weghalen in
+  `routes/listings.js` — die hoort bij de 1-advertentie-per-stad-weergave en is
+  overbodig zodra de homepage weer de volledige lijst toont. De `if` zit al
+  achter `!MARKETPLACE_OPERATIONAL`, dus functioneel gaat het vanzelf goed; dit
+  is alleen opruimen.
 - De hero bovenaan de homepage (`h2` merkregel + `h3` slogan, `views/index.ejs`,
   `.home-hero` in `public/css/style.css`) weer naar beneden verhuizen, terug het
   SEO-blok in boven het article — daar stond hij tot 2026-10-04. Hij staat nu

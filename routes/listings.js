@@ -223,10 +223,24 @@ router.get('/', async (req, res) => {
   // Eén bron voor "de bezoeker heeft zelf iets ingesteld" — ook sorteren en
   // pagina 2 tellen mee, anders zou de 1-per-stad-weergave hieronder blijven
   // hangen op een URL waar de bezoeker juist méér verwacht te zien.
-  const hasAnyFilter = !!(
+  const hasRealFilter = !!(
     q || city || neighborhood || radius || min_price || max_price ||
-    selectedPrices.length || sort || page > 1
+    selectedPrices.length || sort
   );
+  const hasAnyFilter = hasRealFilter || page > 1;
+
+  // Alleen een paginanummer, verder niets: dat hoort bij de volledige lijst, en
+  // die bestaat niet zolang de kale homepage één advertentie per stad toont.
+  // Zonder deze omleiding blijven /?page=2 en /?page=3 de verborgen
+  // demo-advertenties tonen (Google kent die URL's nog van vóór die wijziging
+  // en crawlt ze door) en geeft /?page=4 een lege 200 — een soft 404.
+  // Bewust een 302: zodra de vlag op true gaat bestaan deze pagina's weer, dus
+  // het is geen permanente URL-wijziging. Een actief filter paginereert gewoon
+  // door (?city=Amsterdam&page=2 blijft werken), dus alle advertenties blijven
+  // bereikbaar. Verwijderen bij operationeel (zie GO-LIVE.md).
+  if (!MARKETPLACE_OPERATIONAL && page > 1 && !hasRealFilter) {
+    return res.redirect(302, withLocale(res, '/'));
+  }
 
   const orderBy =
     sort === 'price_asc' ? 'l.price ASC' :
