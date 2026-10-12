@@ -21,6 +21,15 @@ module.exports = [
     metaDescriptionKey: 'legal.over_quickie.meta_description',
     blocks: [
       { type: 'p', textKey: 'legal.over_quickie.intro' },
+      { type: 'h2', textKey: 'legal.over_quickie.h2_verification' },
+      { type: 'p', textKey: 'legal.over_quickie.verification_p' },
+      { type: 'h2', textKey: 'legal.over_quickie.h2_review' },
+      { type: 'p', textKey: 'legal.over_quickie.review_p1' },
+      { type: 'p', textKey: 'legal.over_quickie.review_p2' },
+      { type: 'h2', textKey: 'legal.over_quickie.h2_no_paywall' },
+      { type: 'p', textKey: 'legal.over_quickie.no_paywall_p' },
+      { type: 'h2', textKey: 'legal.over_quickie.h2_advertisers' },
+      { type: 'p', textKey: 'legal.over_quickie.advertisers_p' },
       { type: 'h2', textKey: 'legal.over_quickie.h2_role' },
       { type: 'p', textKey: 'legal.over_quickie.role_p1' },
       { type: 'p', textKey: 'legal.over_quickie.role_p2' },
@@ -42,8 +51,9 @@ module.exports = [
         type: 'lines',
         itemKeys: [
           'legal.over_quickie.company_lines.brand',
-          'legal.over_quickie.company_lines.kvk',
-          'legal.over_quickie.company_lines.vat',
+          // KvK/BTW stonden hier als letterlijke placeholder ("KvK: [nummer]")
+          // en waren als zodanig ook live zichtbaar — eruit tot de echte
+          // nummers er zijn.
           'legal.over_quickie.company_lines.email',
         ],
       },
